@@ -1,35 +1,159 @@
 """HO base objects"""
 
+import re
 from typing import Optional, Callable
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs, quote
 
-from ho.util import SimpleMappingNamespace
+import requests
+
+from ju.json_schema import json_schema_to_signature
 from ju.oas import Route, Routes
 
+from ho.util import SimpleMappingNamespace
 
-def default_route_maker(route_spec, method="get"):
+
+
+def update_spec(
+    spec,
+    path,
+    method,
+    description=None,
+    param_types=None,
+    param_descriptions=None,
+    param_defaults=None,
+    response_schema=None,
+):
     """
-    Convert various input formats to a ju.Route object.
+    Update an OpenAPI spec with provided parameters for a specific path and method.
 
     Parameters:
     -----------
-    route_spec : Union[ju.oas.Route, str, dict]
+    spec : dict
+        The original OpenAPI specification.
+    path : str
+        The endpoint path.
+    method : str
+        The HTTP method.
+    description : str, optional
+        New description to set.
+    param_types : dict, optional
+        Parameter types to update.
+    param_descriptions : dict, optional
+        Parameter descriptions to update.
+    param_defaults : dict, optional
+        Parameter defaults to update.
+    response_schema : dict, optional
+        Response schema to update.
+
+    Returns:
+    --------
+    dict
+        Updated OpenAPI specification.
+    """
+    import copy
+
+    updated_spec = copy.deepcopy(spec)  # Avoid modifying the original
+    endpoint_spec = updated_spec["paths"][path][method.lower()]
+
+    if description:
+        endpoint_spec["summary"] = description
+
+    if any([param_types, param_descriptions, param_defaults]):
+        if "parameters" not in endpoint_spec:
+            endpoint_spec["parameters"] = []
+
+        # Update existing parameters
+        for param in endpoint_spec["parameters"]:
+            name = param["name"]
+            if param_types and name in param_types:
+                param["schema"]["type"] = param_types[name]
+            if param_descriptions and name in param_descriptions:
+                param["description"] = param_descriptions[name]
+            if param_defaults and name in param_defaults:
+                if "schema" not in param:
+                    param["schema"] = {}
+                param["schema"]["default"] = param_defaults[name]
+
+    if response_schema:
+        endpoint_spec.setdefault("responses", {})
+        endpoint_spec["responses"].setdefault(
+            "200", {"description": "Successful response"}
+        )
+        endpoint_spec["responses"]["200"]["content"] = {
+            "application/json": {"schema": response_schema}
+        }
+
+    return updated_spec
+
+
+def default_route_maker(
+    route_spec,
+    method="get",
+    description="",
+    param_types=None,
+    param_descriptions=None,
+    param_defaults=None,
+    response_schema=None,
+    openapi_template=None,
+):
+    """
+    Convert various input formats to a ju.oas.Route object, optionally modifying the spec.
+
+    Parameters:
+    -----------
+    route_spec : Union[ju.oas.Route, str, dict, tuple]
         The route specification in one of several formats:
         - ju.oas.Route: returned unchanged
         - str: treated as a URL template and converted to a Route
         - dict: treated as an OpenAPI spec and converted to a Route
+        - tuple: (method, endpoint) or (method, endpoint, spec)
     method : str, optional
         HTTP method to use when route_spec is a string (default: "get")
+    description : str, optional
+        Description to override or set for the endpoint
+    param_types : dict, optional
+        Dictionary mapping parameter names to their types
+    param_descriptions : dict, optional
+        Dictionary mapping parameter names to their descriptions
+    param_defaults : dict, optional
+        Dictionary mapping parameter names to their default values
+    response_schema : dict, optional
+        Schema for the response
+    openapi_template : dict, optional
+        Custom OpenAPI template for string inputs
 
     Returns:
     --------
     ju.oas.Route
         A Route object representing the API endpoint
     """
+    from ju.oas import Routes, Route
 
     # Case 1: Already a Route object
     if isinstance(route_spec, Route):
-        return route_spec
+        route = route_spec
+        # If additional parameters are provided, update the spec
+        if any(
+            [
+                description,
+                param_types,
+                param_descriptions,
+                param_defaults,
+                response_schema,
+            ]
+        ):
+            updated_spec = update_spec(
+                route.spec,
+                route.endpoint,
+                route.method,
+                description=description,
+                param_types=param_types,
+                param_descriptions=param_descriptions,
+                param_defaults=param_defaults,
+                response_schema=response_schema,
+            )
+            route = Route(route.method, route.endpoint, updated_spec)
+        return route
 
     # Case 2: String (URL template)
     elif isinstance(route_spec, str):
@@ -42,8 +166,17 @@ def default_route_maker(route_spec, method="get"):
             if parsed_url.query:
                 endpoint_path += f"?{parsed_url.query}"
 
-            # Convert to OpenAPI spec
-            spec = url_template_to_openapi(route_spec, method=method)
+            # Convert to OpenAPI spec with all the provided parameters
+            spec = url_template_to_openapi(
+                route_spec,
+                method=method,
+                description=description,
+                param_types=param_types or {},
+                param_descriptions=param_descriptions or {},
+                param_defaults=param_defaults or {},
+                response_schema=response_schema,
+                openapi_template=openapi_template,
+            )
             routes = Routes(spec)
             path = list(spec["paths"].keys())[0]
             return routes[method.lower(), path]
@@ -62,7 +195,29 @@ def default_route_maker(route_spec, method="get"):
         routes = Routes(route_spec)
         # If there's only one path and method, use that
         if len(list(routes)) == 1:
-            return routes[next(iter(routes))]
+            route = routes[next(iter(routes))]
+            # If additional parameters are provided, update the spec
+            if any(
+                [
+                    description,
+                    param_types,
+                    param_descriptions,
+                    param_defaults,
+                    response_schema,
+                ]
+            ):
+                updated_spec = update_spec(
+                    route.spec,
+                    route.endpoint,
+                    route.method,
+                    description=description,
+                    param_types=param_types,
+                    param_descriptions=param_descriptions,
+                    param_defaults=param_defaults,
+                    response_schema=response_schema,
+                )
+                route = Route(route.method, route.endpoint, updated_spec)
+            return route
         else:
             raise ValueError(
                 "OpenAPI spec contains multiple routes. Please specify method and endpoint."
@@ -76,6 +231,28 @@ def default_route_maker(route_spec, method="get"):
             if len(route_spec) > 2
             else {"openapi": "3.0.3", "paths": {endpoint: {method: {}}}}
         )
+
+        # If additional parameters are provided, update the spec
+        if any(
+            [
+                description,
+                param_types,
+                param_descriptions,
+                param_defaults,
+                response_schema,
+            ]
+        ):
+            spec = update_spec(
+                spec,
+                endpoint,
+                method,
+                description=description,
+                param_types=param_types,
+                param_descriptions=param_descriptions,
+                param_defaults=param_defaults,
+                response_schema=response_schema,
+            )
+
         return Route(method, endpoint, spec)
 
     else:
@@ -86,7 +263,7 @@ def default_route_maker(route_spec, method="get"):
 
 def route_to_func(
     route,
-    base_url: str,
+    base_url: Optional[str] = None,
     *,
     route_maker=None,
     method: str = "get",
@@ -96,6 +273,13 @@ def route_to_func(
     egress: Optional[Callable] = None,
     custom_headers=None,
     name: Optional[str] = None,
+    # arguments for customizing the route specification:
+    description: str = "",
+    param_types: dict = None,
+    param_descriptions: dict = None,
+    param_defaults: dict = None,
+    response_schema: dict = None,
+    openapi_template=None,
 ):
     """
     Generate a Python function from an OpenAPI route specification.
@@ -111,8 +295,9 @@ def route_to_func(
         - str: A URL template with placeholders (e.g., "https://api.example.com/items/{id}")
         - dict: An OpenAPI specification dictionary
         - tuple: (method, endpoint) or (method, endpoint, spec)
-    base_url : str
-        The base URL of the web service.
+    base_url : str, optional
+        The base URL of the web service. If None, attempts to extract from the OpenAPI spec's
+        servers array. At least one of base_url or a server URL in the spec must be provided.
     route_maker : callable, optional
         A function to convert the route parameter to a ju.oas.Route object.
         If None, default_route_maker is used.
@@ -152,16 +337,41 @@ def route_to_func(
     >>> spec = {"openapi": "3.0.3", "paths": {"/items": {"get": {"parameters": [...]}}}}  # doctest: +SKIP
     >>> get_items = route_to_func(spec, 'https://api.example.com')  # doctest: +SKIP
     """
-    import requests
-    from functools import wraps
-    from ju.json_schema import json_schema_to_signature
-    import urllib.parse
-
     # Convert route to a ju.oas.Route object
     if route_maker is None:
-        route_maker = lambda r: default_route_maker(r, method=method)
+        route_maker = lambda r: default_route_maker(
+            r,
+            method=method,
+            description=description,
+            param_types=param_types,
+            param_descriptions=param_descriptions,
+            param_defaults=param_defaults,
+            response_schema=response_schema,
+            openapi_template=openapi_template,
+        )
 
     route = route_maker(route)
+
+    # Try to get base_url from the OpenAPI spec if not provided
+    if base_url is None:
+        # Look for servers in the OpenAPI spec
+        if hasattr(route, 'spec') and 'servers' in route.spec and route.spec['servers']:
+            # Use the first server URL as the base URL
+            base_url = route.spec['servers'][0]['url']
+        else:
+            # Special case for URL templates that already include base URL
+            if isinstance(route, Route) and route.endpoint.startswith('http'):
+                # For URL templates with full URLs as endpoints
+                parsed = urlparse(route.endpoint)
+                base_url = f"{parsed.scheme}://{parsed.netloc}"
+                # Adjust the endpoint to be just the path
+                route.endpoint = parsed.path + (
+                    '?' + parsed.query if parsed.query else ''
+                )
+            else:
+                raise ValueError(
+                    "No base_url provided and no servers defined in the OpenAPI spec"
+                )
 
     # Get the function signature from the route parameters
     sig = json_schema_to_signature(route.params)
@@ -244,7 +454,7 @@ def route_to_func(
         if path_params:
             for name, value in path_params.items():
                 formatted_url = formatted_url.replace(
-                    f"{{{name}}}", urllib.parse.quote(str(value))
+                    f"{{{name}}}", quote(str(value))
                 )
 
         # Set up headers
@@ -327,7 +537,7 @@ def route_to_func(
     return func
 
 
-def routes_to_functions(
+def routes_to_funcs(
     spec_or_routes, base_url, *, name_as_key: bool = False, **route_to_func_kwargs
 ):
     """
@@ -355,7 +565,7 @@ def routes_to_functions(
 
     >>> from ju.oas import Routes
     >>> routes = Routes(openapi_spec)  # doctest: +SKIP
-    >>> api_functions = routes_to_functions(routes, 'https://api.example.com')  # doctest: +SKIP
+    >>> api_functions = routes_to_funcs(routes, 'https://api.example.com')  # doctest: +SKIP
     >>> items = api_functions['get', '/items'](type='electronics')  # doctest: +SKIP
     """
     from ju.oas import Routes
@@ -381,7 +591,7 @@ def routes_to_functions(
 
 
 def routes_to_namespace(spec_or_routes, base_url, **route_to_func_kwargs):
-    funcs = routes_to_functions(
+    funcs = routes_to_funcs(
         spec_or_routes, base_url, name_as_key=True, **route_to_func_kwargs
     )
     return SimpleMappingNamespace(**funcs)
@@ -464,16 +674,18 @@ def url_template_to_openapi(
     dict
         OpenAPI specification as a dictionary
     """
-    import re
-    from urllib.parse import urlparse, parse_qs
-
     param_types = param_types or {}
     param_descriptions = param_descriptions or {}
     param_defaults = param_defaults or {}
 
-    # Parse the URL to get path
+    # Parse the URL to get path and base URL
     parsed_url = urlparse(url_template)
     path = parsed_url.path
+    base_url = (
+        f"{parsed_url.scheme}://{parsed_url.netloc}"
+        if parsed_url.scheme and parsed_url.netloc
+        else None
+    )
 
     # Extract path parameters with optional defaults
     path_params_match = re.findall(r'\{([^{}]+)\}', path)
@@ -543,6 +755,14 @@ def url_template_to_openapi(
                 "responses": {"200": {"description": "Successful response"}},
             }
 
+    # Add server information if we have a base URL
+    if base_url:
+        if 'servers' not in openapi_spec:
+            openapi_spec['servers'] = []
+        openapi_spec['servers'].append(
+            {"url": base_url, "description": "Generated from URL template"}
+        )
+
     # Add parameters to the spec
     endpoint_spec = openapi_spec['paths'][path][method.lower()]
     if 'parameters' not in endpoint_spec:
@@ -592,7 +812,7 @@ def url_template_to_openapi(
     return openapi_spec
 
 
-def template_to_func(
+def url_template_to_func(
     url_template: str,
     *,
     method: str = "get",
@@ -652,7 +872,7 @@ def template_to_func(
 
     Example:
     --------
-    >>> search_google = template_to_func(
+    >>> search_google = url_template_to_func(
     ...     "https://www.google.com/search?q={search_term}",
     ...     description="Search Google",
     ...     egress=lambda response: response.text
@@ -660,7 +880,7 @@ def template_to_func(
     >>> results = search_google(search_term="Python")
 
     >>> # Example using REST Countries API with path and query parameters
-    >>> get_country = template_to_func(
+    >>> get_country = url_template_to_func(
     ...     "https://restcountries.com/v3.1/name/{country_name}?fullText={full_text:false}&fields={fields:name,capital,population}",
     ...     description="Get country information by name",
     ...     param_types={"country_name": "string", "full_text": "boolean", "fields": "string"},
@@ -675,7 +895,7 @@ def template_to_func(
     (country_name: str, full_text: bool = 'false', fields: str = 'name,capital,population')
 
     >>> # Example using TheMealDB API with multiple query parameters
-    >>> search_meals = template_to_func(
+    >>> search_meals = url_template_to_func(
     ...     "https://www.themealdb.com/api/json/v1/1/filter.php?c={category:Dessert}&a={area:}",
     ...     description="Search for meals by category and area",
     ...     param_types={"category": "string", "area": "string"},
@@ -688,8 +908,6 @@ def template_to_func(
     >>> # italian_desserts = search_meals(area="Italian")  # Uses default category="Dessert"
     >>> # seafood_meals = search_meals(category="Seafood")  # No area specified
     """
-    from urllib.parse import urlparse
-    from ju.oas import Routes
 
     # Parse the URL to get base URL
     parsed_url = urlparse(url_template)
