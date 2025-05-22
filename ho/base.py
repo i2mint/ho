@@ -12,7 +12,6 @@ from ju.oas import Route, Routes
 from ho.util import SimpleMappingNamespace
 
 
-
 def update_spec(
     spec,
     path,
@@ -355,18 +354,18 @@ def route_to_func(
     # Try to get base_url from the OpenAPI spec if not provided
     if base_url is None:
         # Look for servers in the OpenAPI spec
-        if hasattr(route, 'spec') and 'servers' in route.spec and route.spec['servers']:
+        if hasattr(route, "spec") and "servers" in route.spec and route.spec["servers"]:
             # Use the first server URL as the base URL
-            base_url = route.spec['servers'][0]['url']
+            base_url = route.spec["servers"][0]["url"]
         else:
             # Special case for URL templates that already include base URL
-            if isinstance(route, Route) and route.endpoint.startswith('http'):
+            if isinstance(route, Route) and route.endpoint.startswith("http"):
                 # For URL templates with full URLs as endpoints
                 parsed = urlparse(route.endpoint)
                 base_url = f"{parsed.scheme}://{parsed.netloc}"
                 # Adjust the endpoint to be just the path
                 route.endpoint = parsed.path + (
-                    '?' + parsed.query if parsed.query else ''
+                    "?" + parsed.query if parsed.query else ""
                 )
             else:
                 raise ValueError(
@@ -377,10 +376,10 @@ def route_to_func(
     sig = json_schema_to_signature(route.params)
 
     # Ensure the base URL doesn't end with a slash if the endpoint starts with one
-    clean_base_url = base_url.rstrip('/')
+    clean_base_url = base_url.rstrip("/")
     endpoint = route.endpoint
-    if not endpoint.startswith('/'):
-        endpoint = '/' + endpoint
+    if not endpoint.startswith("/"):
+        endpoint = "/" + endpoint
 
     full_url = clean_base_url + endpoint
     http_method = route.method.lower()
@@ -453,9 +452,7 @@ def route_to_func(
         formatted_url = full_url
         if path_params:
             for name, value in path_params.items():
-                formatted_url = formatted_url.replace(
-                    f"{{{name}}}", quote(str(value))
-                )
+                formatted_url = formatted_url.replace(f"{{{name}}}", quote(str(value)))
 
         # Set up headers
         headers = {"Content-Type": "application/json"}
@@ -508,8 +505,8 @@ def route_to_func(
             import re
 
             clean_endpoint = route.endpoint
-            path_param_pattern = re.compile(r'{([^}]+)}')
-            clean_endpoint = path_param_pattern.sub(r'_\1_', clean_endpoint)
+            path_param_pattern = re.compile(r"{([^}]+)}")
+            clean_endpoint = path_param_pattern.sub(r"_\1_", clean_endpoint)
             name = f"{http_method}_{clean_endpoint.replace('/', '_').strip('_')}"
 
         func.__name__ = name
@@ -610,7 +607,7 @@ def default_response_processor(response):
     try:
         return response.json()
     except ValueError:
-        if 'text' in response.headers.get('Content-Type', '').lower():
+        if "text" in response.headers.get("Content-Type", "").lower():
             return response.text
         return response.content
 
@@ -688,13 +685,13 @@ def url_template_to_openapi(
     )
 
     # Extract path parameters with optional defaults
-    path_params_match = re.findall(r'\{([^{}]+)\}', path)
+    path_params_match = re.findall(r"\{([^{}]+)\}", path)
     path_params = []
 
     # Process inline defaults in path parameters
     for param_match in path_params_match:
-        if ':' in param_match:
-            param_name, default_value = param_match.split(':', 1)
+        if ":" in param_match:
+            param_name, default_value = param_match.split(":", 1)
             param_defaults[param_name] = default_value
             path_params.append(param_name)
             # Update the path to use the parameter name without default
@@ -713,12 +710,12 @@ def url_template_to_openapi(
         # Process each query parameter
         for param_name, values in template_query_params.items():
             # Check if this is a template parameter
-            param_match = re.search(r'\{([^{}]+)\}', param_name)
+            param_match = re.search(r"\{([^{}]+)\}", param_name)
             if param_match:
                 # This is a template parameter in the query parameter name
                 param_content = param_match.group(1)
-                if ':' in param_content:
-                    param_name, default_value = param_content.split(':', 1)
+                if ":" in param_content:
+                    param_name, default_value = param_content.split(":", 1)
                     param_defaults[param_name] = default_value
                 else:
                     param_name = param_content
@@ -726,11 +723,11 @@ def url_template_to_openapi(
             else:
                 # Check if the value contains a template
                 for value in values:
-                    param_match = re.search(r'\{([^{}]+)\}', value)
+                    param_match = re.search(r"\{([^{}]+)\}", value)
                     if param_match:
                         param_content = param_match.group(1)
-                        if ':' in param_content:
-                            param_name, default_value = param_content.split(':', 1)
+                        if ":" in param_content:
+                            param_name, default_value = param_content.split(":", 1)
                             param_defaults[param_name] = default_value
                         else:
                             param_name = param_content
@@ -744,12 +741,12 @@ def url_template_to_openapi(
 
         openapi_spec = copy.deepcopy(openapi_template)
         # Make sure the path and method exist in the template
-        if 'paths' not in openapi_spec:
-            openapi_spec['paths'] = {}
-        if path not in openapi_spec['paths']:
-            openapi_spec['paths'][path] = {}
-        if method.lower() not in openapi_spec['paths'][path]:
-            openapi_spec['paths'][path][method.lower()] = {
+        if "paths" not in openapi_spec:
+            openapi_spec["paths"] = {}
+        if path not in openapi_spec["paths"]:
+            openapi_spec["paths"][path] = {}
+        if method.lower() not in openapi_spec["paths"][path]:
+            openapi_spec["paths"][path][method.lower()] = {
                 "summary": description,
                 "parameters": [],
                 "responses": {"200": {"description": "Successful response"}},
@@ -757,16 +754,16 @@ def url_template_to_openapi(
 
     # Add server information if we have a base URL
     if base_url:
-        if 'servers' not in openapi_spec:
-            openapi_spec['servers'] = []
-        openapi_spec['servers'].append(
+        if "servers" not in openapi_spec:
+            openapi_spec["servers"] = []
+        openapi_spec["servers"].append(
             {"url": base_url, "description": "Generated from URL template"}
         )
 
     # Add parameters to the spec
-    endpoint_spec = openapi_spec['paths'][path][method.lower()]
-    if 'parameters' not in endpoint_spec:
-        endpoint_spec['parameters'] = []
+    endpoint_spec = openapi_spec["paths"][path][method.lower()]
+    if "parameters" not in endpoint_spec:
+        endpoint_spec["parameters"] = []
 
     # Add path parameters
     for param in path_params:
@@ -800,12 +797,12 @@ def url_template_to_openapi(
 
     # Add response schema if provided
     if response_schema:
-        if 'responses' not in endpoint_spec:
-            endpoint_spec['responses'] = {}
-        if '200' not in endpoint_spec['responses']:
-            endpoint_spec['responses']['200'] = {"description": "Successful response"}
+        if "responses" not in endpoint_spec:
+            endpoint_spec["responses"] = {}
+        if "200" not in endpoint_spec["responses"]:
+            endpoint_spec["responses"]["200"] = {"description": "Successful response"}
 
-        endpoint_spec['responses']['200']['content'] = {
+        endpoint_spec["responses"]["200"]["content"] = {
             "application/json": {"schema": response_schema}
         }
 
@@ -933,11 +930,11 @@ def url_template_to_func(
 
     # Convert route to function
     route_kwargs = {
-        'session': session,
-        'error_handler': error_handler,
-        'timeout': timeout,
-        'egress': egress,
-        'custom_headers': custom_headers,
+        "session": session,
+        "error_handler": error_handler,
+        "timeout": timeout,
+        "egress": egress,
+        "custom_headers": custom_headers,
     }
     # Remove None values to use defaults in route_to_func
     route_kwargs = {k: v for k, v in route_kwargs.items() if v is not None}

@@ -58,12 +58,12 @@ def extract_placeholders(url_template: str):
     placeholders = {}
 
     # Find all placeholder patterns {name} or {name:default}
-    placeholder_pattern = re.compile(r'\{([^{}]+)\}')
+    placeholder_pattern = re.compile(r"\{([^{}]+)\}")
 
     # Parse the URL to process both path and query
     parsed_url = urlparse(url_template)
     full_path = (
-        parsed_url.path + '?' + parsed_url.query
+        parsed_url.path + "?" + parsed_url.query
         if parsed_url.query
         else parsed_url.path
     )
@@ -71,8 +71,8 @@ def extract_placeholders(url_template: str):
     # Extract all placeholders
     for match in placeholder_pattern.finditer(full_path):
         param_content = match.group(1)
-        if ':' in param_content:
-            param_name, default_value = param_content.split(':', 1)
+        if ":" in param_content:
+            param_name, default_value = param_content.split(":", 1)
             placeholders[param_name] = default_value
         else:
             placeholders[param_content] = None
