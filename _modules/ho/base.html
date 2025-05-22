@@ -1,0 +1,1080 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ho.base &mdash; ho 0.0.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=1fd71caa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ho.html">ho</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ho/base.html">ho.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/ho/util.html">ho.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ho.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ho.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;HO base objects&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">parse_qs</span><span class="p">,</span> <span class="n">quote</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ju.json_schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">json_schema_to_signature</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ju.oas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Route</span><span class="p">,</span> <span class="n">Routes</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ho.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleMappingNamespace</span>
+
+
+
+<div class="viewcode-block" id="update_spec">
+<a class="viewcode-back" href="../../module_docs/ho/base.html#ho.base.update_spec">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_spec</span><span class="p">(</span>
+    <span class="n">spec</span><span class="p">,</span>
+    <span class="n">path</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_descriptions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_defaults</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">response_schema</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update an OpenAPI spec with provided parameters for a specific path and method.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    spec : dict</span>
+<span class="sd">        The original OpenAPI specification.</span>
+<span class="sd">    path : str</span>
+<span class="sd">        The endpoint path.</span>
+<span class="sd">    method : str</span>
+<span class="sd">        The HTTP method.</span>
+<span class="sd">    description : str, optional</span>
+<span class="sd">        New description to set.</span>
+<span class="sd">    param_types : dict, optional</span>
+<span class="sd">        Parameter types to update.</span>
+<span class="sd">    param_descriptions : dict, optional</span>
+<span class="sd">        Parameter descriptions to update.</span>
+<span class="sd">    param_defaults : dict, optional</span>
+<span class="sd">        Parameter defaults to update.</span>
+<span class="sd">    response_schema : dict, optional</span>
+<span class="sd">        Response schema to update.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Updated OpenAPI specification.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+    <span class="n">updated_spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>  <span class="c1"># Avoid modifying the original</span>
+    <span class="n">endpoint_spec</span> <span class="o">=</span> <span class="n">updated_spec</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">][</span><span class="n">path</span><span class="p">][</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+
+    <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
+        <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;summary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+
+    <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">param_types</span><span class="p">,</span> <span class="n">param_descriptions</span><span class="p">,</span> <span class="n">param_defaults</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="s2">&quot;parameters&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpoint_spec</span><span class="p">:</span>
+            <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Update existing parameters</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">param_types</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">param_types</span><span class="p">:</span>
+                <span class="n">param</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_types</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">param_descriptions</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">param_descriptions</span><span class="p">:</span>
+                <span class="n">param</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_descriptions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">param_defaults</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">param_defaults</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;schema&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param</span><span class="p">:</span>
+                    <span class="n">param</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">param</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">][</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_defaults</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">response_schema</span><span class="p">:</span>
+        <span class="n">endpoint_spec</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;responses&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+            <span class="s2">&quot;200&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Successful response&quot;</span><span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">][</span><span class="s2">&quot;200&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;application/json&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">response_schema</span><span class="p">}</span>
+        <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">updated_spec</span></div>
+
+
+
+<div class="viewcode-block" id="default_route_maker">
+<a class="viewcode-back" href="../../module_docs/ho/base.html#ho.base.default_route_maker">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_route_maker</span><span class="p">(</span>
+    <span class="n">route_spec</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;get&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">param_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_descriptions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_defaults</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">response_schema</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">openapi_template</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert various input formats to a ju.oas.Route object, optionally modifying the spec.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    route_spec : Union[ju.oas.Route, str, dict, tuple]</span>
+<span class="sd">        The route specification in one of several formats:</span>
+<span class="sd">        - ju.oas.Route: returned unchanged</span>
+<span class="sd">        - str: treated as a URL template and converted to a Route</span>
+<span class="sd">        - dict: treated as an OpenAPI spec and converted to a Route</span>
+<span class="sd">        - tuple: (method, endpoint) or (method, endpoint, spec)</span>
+<span class="sd">    method : str, optional</span>
+<span class="sd">        HTTP method to use when route_spec is a string (default: &quot;get&quot;)</span>
+<span class="sd">    description : str, optional</span>
+<span class="sd">        Description to override or set for the endpoint</span>
+<span class="sd">    param_types : dict, optional</span>
+<span class="sd">        Dictionary mapping parameter names to their types</span>
+<span class="sd">    param_descriptions : dict, optional</span>
+<span class="sd">        Dictionary mapping parameter names to their descriptions</span>
+<span class="sd">    param_defaults : dict, optional</span>
+<span class="sd">        Dictionary mapping parameter names to their default values</span>
+<span class="sd">    response_schema : dict, optional</span>
+<span class="sd">        Schema for the response</span>
+<span class="sd">    openapi_template : dict, optional</span>
+<span class="sd">        Custom OpenAPI template for string inputs</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    ju.oas.Route</span>
+<span class="sd">        A Route object representing the API endpoint</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ju.oas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Routes</span><span class="p">,</span> <span class="n">Route</span>
+
+    <span class="c1"># Case 1: Already a Route object</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route_spec</span><span class="p">,</span> <span class="n">Route</span><span class="p">):</span>
+        <span class="n">route</span> <span class="o">=</span> <span class="n">route_spec</span>
+        <span class="c1"># If additional parameters are provided, update the spec</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">description</span><span class="p">,</span>
+                <span class="n">param_types</span><span class="p">,</span>
+                <span class="n">param_descriptions</span><span class="p">,</span>
+                <span class="n">param_defaults</span><span class="p">,</span>
+                <span class="n">response_schema</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">):</span>
+            <span class="n">updated_spec</span> <span class="o">=</span> <span class="n">update_spec</span><span class="p">(</span>
+                <span class="n">route</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span>
+                <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span>
+                <span class="n">route</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">param_types</span><span class="o">=</span><span class="n">param_types</span><span class="p">,</span>
+                <span class="n">param_descriptions</span><span class="o">=</span><span class="n">param_descriptions</span><span class="p">,</span>
+                <span class="n">param_defaults</span><span class="o">=</span><span class="n">param_defaults</span><span class="p">,</span>
+                <span class="n">response_schema</span><span class="o">=</span><span class="n">response_schema</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">route</span> <span class="o">=</span> <span class="n">Route</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">updated_spec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">route</span>
+
+    <span class="c1"># Case 2: String (URL template)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route_spec</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># Handle URL template</span>
+        <span class="n">parsed_url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">route_spec</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">and</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">netloc</span><span class="p">:</span>
+            <span class="c1"># Full URL template with scheme and domain</span>
+            <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">scheme</span><span class="si">}</span><span class="s2">://</span><span class="si">{</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">netloc</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">endpoint_path</span> <span class="o">=</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">path</span>
+            <span class="k">if</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">query</span><span class="p">:</span>
+                <span class="n">endpoint_path</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;?</span><span class="si">{</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">query</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="c1"># Convert to OpenAPI spec with all the provided parameters</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">url_template_to_openapi</span><span class="p">(</span>
+                <span class="n">route_spec</span><span class="p">,</span>
+                <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">param_types</span><span class="o">=</span><span class="n">param_types</span> <span class="ow">or</span> <span class="p">{},</span>
+                <span class="n">param_descriptions</span><span class="o">=</span><span class="n">param_descriptions</span> <span class="ow">or</span> <span class="p">{},</span>
+                <span class="n">param_defaults</span><span class="o">=</span><span class="n">param_defaults</span> <span class="ow">or</span> <span class="p">{},</span>
+                <span class="n">response_schema</span><span class="o">=</span><span class="n">response_schema</span><span class="p">,</span>
+                <span class="n">openapi_template</span><span class="o">=</span><span class="n">openapi_template</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">routes</span> <span class="o">=</span> <span class="n">Routes</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">routes</span><span class="p">[</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">path</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Just an endpoint path</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;URL template must include scheme and domain: </span><span class="si">{</span><span class="n">route_spec</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Case 3: Dict (OpenAPI spec)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route_spec</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="c1"># Assume it&#39;s an OpenAPI spec</span>
+        <span class="k">if</span> <span class="s2">&quot;paths&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">route_spec</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Dict must be a valid OpenAPI spec with &#39;paths&#39; key&quot;</span><span class="p">)</span>
+
+        <span class="n">routes</span> <span class="o">=</span> <span class="n">Routes</span><span class="p">(</span><span class="n">route_spec</span><span class="p">)</span>
+        <span class="c1"># If there&#39;s only one path and method, use that</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">routes</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">route</span> <span class="o">=</span> <span class="n">routes</span><span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">routes</span><span class="p">))]</span>
+            <span class="c1"># If additional parameters are provided, update the spec</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">description</span><span class="p">,</span>
+                    <span class="n">param_types</span><span class="p">,</span>
+                    <span class="n">param_descriptions</span><span class="p">,</span>
+                    <span class="n">param_defaults</span><span class="p">,</span>
+                    <span class="n">response_schema</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">):</span>
+                <span class="n">updated_spec</span> <span class="o">=</span> <span class="n">update_spec</span><span class="p">(</span>
+                    <span class="n">route</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span>
+                    <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span>
+                    <span class="n">route</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+                    <span class="n">param_types</span><span class="o">=</span><span class="n">param_types</span><span class="p">,</span>
+                    <span class="n">param_descriptions</span><span class="o">=</span><span class="n">param_descriptions</span><span class="p">,</span>
+                    <span class="n">param_defaults</span><span class="o">=</span><span class="n">param_defaults</span><span class="p">,</span>
+                    <span class="n">response_schema</span><span class="o">=</span><span class="n">response_schema</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">route</span> <span class="o">=</span> <span class="n">Route</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">updated_spec</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">route</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;OpenAPI spec contains multiple routes. Please specify method and endpoint.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Case 4: Tuple of (method, endpoint, spec)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route_spec</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">route_spec</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">method</span><span class="p">,</span> <span class="n">endpoint</span> <span class="o">=</span> <span class="n">route_spec</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">route_spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">route_spec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">route_spec</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span>
+            <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;openapi&quot;</span><span class="p">:</span> <span class="s2">&quot;3.0.3&quot;</span><span class="p">,</span> <span class="s2">&quot;paths&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">endpoint</span><span class="p">:</span> <span class="p">{</span><span class="n">method</span><span class="p">:</span> <span class="p">{}}}}</span>
+        <span class="p">)</span>
+
+        <span class="c1"># If additional parameters are provided, update the spec</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">description</span><span class="p">,</span>
+                <span class="n">param_types</span><span class="p">,</span>
+                <span class="n">param_descriptions</span><span class="p">,</span>
+                <span class="n">param_defaults</span><span class="p">,</span>
+                <span class="n">response_schema</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">):</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">update_spec</span><span class="p">(</span>
+                <span class="n">spec</span><span class="p">,</span>
+                <span class="n">endpoint</span><span class="p">,</span>
+                <span class="n">method</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">param_types</span><span class="o">=</span><span class="n">param_types</span><span class="p">,</span>
+                <span class="n">param_descriptions</span><span class="o">=</span><span class="n">param_descriptions</span><span class="p">,</span>
+                <span class="n">param_defaults</span><span class="o">=</span><span class="n">param_defaults</span><span class="p">,</span>
+                <span class="n">response_schema</span><span class="o">=</span><span class="n">response_schema</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Route</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Cannot convert </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">route_spec</span><span class="p">)</span><span class="si">}</span><span class="s2"> to Route. Expected Route, string URL template, or OpenAPI spec dict.&quot;</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="route_to_func">
+<a class="viewcode-back" href="../../module_docs/ho/base.html#ho.base.route_to_func">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">route_to_func</span><span class="p">(</span>
+    <span class="n">route</span><span class="p">,</span>
+    <span class="n">base_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">route_maker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span>
+    <span class="n">session</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">error_handler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">egress</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">custom_headers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># arguments for customizing the route specification:</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">param_types</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_descriptions</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_defaults</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">response_schema</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">openapi_template</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a Python function from an OpenAPI route specification.</span>
+
+<span class="sd">    The generated function will make HTTP requests to the web service</span>
+<span class="sd">    according to the route&#39;s method and parameters.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    route : Union[ju.oas.Route, str, dict, tuple]</span>
+<span class="sd">        The route specification in one of several formats:</span>
+<span class="sd">        - ju.oas.Route: An OpenAPI route specification</span>
+<span class="sd">        - str: A URL template with placeholders (e.g., &quot;https://api.example.com/items/{id}&quot;)</span>
+<span class="sd">        - dict: An OpenAPI specification dictionary</span>
+<span class="sd">        - tuple: (method, endpoint) or (method, endpoint, spec)</span>
+<span class="sd">    base_url : str, optional</span>
+<span class="sd">        The base URL of the web service. If None, attempts to extract from the OpenAPI spec&#39;s</span>
+<span class="sd">        servers array. At least one of base_url or a server URL in the spec must be provided.</span>
+<span class="sd">    route_maker : callable, optional</span>
+<span class="sd">        A function to convert the route parameter to a ju.oas.Route object.</span>
+<span class="sd">        If None, default_route_maker is used.</span>
+<span class="sd">    method : str, optional</span>
+<span class="sd">        HTTP method to use when route is a string template (default: &quot;get&quot;)</span>
+<span class="sd">    session : requests.Session, optional</span>
+<span class="sd">        A session object to use for requests. If None, a new session will be created for each request.</span>
+<span class="sd">    error_handler : callable, optional</span>
+<span class="sd">        A function to handle request errors. Should accept (response, exception) and return a value or raise.</span>
+<span class="sd">    timeout : int, optional</span>
+<span class="sd">        Request timeout in seconds.</span>
+<span class="sd">    egress : callable, optional</span>
+<span class="sd">        A function to process the response before returning. If None, JSON will be attempted first,</span>
+<span class="sd">        then text, then binary content.</span>
+<span class="sd">    custom_headers : dict, optional</span>
+<span class="sd">        Custom headers to include in all requests.</span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        The name of the generated function. If None, a default name will be generated based on the route.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    callable</span>
+<span class="sd">        A Python function that implements the specified route.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; # Using a Route object</span>
+<span class="sd">    &gt;&gt;&gt; from ju.oas import Routes</span>
+<span class="sd">    &gt;&gt;&gt; routes = Routes(openapi_spec)  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; get_items = route_to_func(routes[&#39;get&#39;, &#39;/items&#39;], &#39;https://api.example.com&#39;)  # doctest: +SKIP</span>
+
+<span class="sd">    &gt;&gt;&gt; # Using a URL template</span>
+<span class="sd">    &gt;&gt;&gt; get_item = route_to_func(&quot;https://api.example.com/items/{item_id}&quot;, &#39;https://api.example.com&#39;)  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; item = get_item(item_id=&quot;abc123&quot;)  # doctest: +SKIP</span>
+
+<span class="sd">    &gt;&gt;&gt; # Using an OpenAPI spec dictionary</span>
+<span class="sd">    &gt;&gt;&gt; spec = {&quot;openapi&quot;: &quot;3.0.3&quot;, &quot;paths&quot;: {&quot;/items&quot;: {&quot;get&quot;: {&quot;parameters&quot;: [...]}}}}  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; get_items = route_to_func(spec, &#39;https://api.example.com&#39;)  # doctest: +SKIP</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert route to a ju.oas.Route object</span>
+    <span class="k">if</span> <span class="n">route_maker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">route_maker</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">default_route_maker</span><span class="p">(</span>
+            <span class="n">r</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">param_types</span><span class="o">=</span><span class="n">param_types</span><span class="p">,</span>
+            <span class="n">param_descriptions</span><span class="o">=</span><span class="n">param_descriptions</span><span class="p">,</span>
+            <span class="n">param_defaults</span><span class="o">=</span><span class="n">param_defaults</span><span class="p">,</span>
+            <span class="n">response_schema</span><span class="o">=</span><span class="n">response_schema</span><span class="p">,</span>
+            <span class="n">openapi_template</span><span class="o">=</span><span class="n">openapi_template</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">route</span> <span class="o">=</span> <span class="n">route_maker</span><span class="p">(</span><span class="n">route</span><span class="p">)</span>
+
+    <span class="c1"># Try to get base_url from the OpenAPI spec if not provided</span>
+    <span class="k">if</span> <span class="n">base_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Look for servers in the OpenAPI spec</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="s1">&#39;spec&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;servers&#39;</span> <span class="ow">in</span> <span class="n">route</span><span class="o">.</span><span class="n">spec</span> <span class="ow">and</span> <span class="n">route</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s1">&#39;servers&#39;</span><span class="p">]:</span>
+            <span class="c1"># Use the first server URL as the base URL</span>
+            <span class="n">base_url</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s1">&#39;servers&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Special case for URL templates that already include base URL</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">Route</span><span class="p">)</span> <span class="ow">and</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">):</span>
+                <span class="c1"># For URL templates with full URLs as endpoints</span>
+                <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="p">)</span>
+                <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parsed</span><span class="o">.</span><span class="n">scheme</span><span class="si">}</span><span class="s2">://</span><span class="si">{</span><span class="n">parsed</span><span class="o">.</span><span class="n">netloc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="c1"># Adjust the endpoint to be just the path</span>
+                <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="p">(</span>
+                    <span class="s1">&#39;?&#39;</span> <span class="o">+</span> <span class="n">parsed</span><span class="o">.</span><span class="n">query</span> <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">query</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;No base_url provided and no servers defined in the OpenAPI spec&quot;</span>
+                <span class="p">)</span>
+
+    <span class="c1"># Get the function signature from the route parameters</span>
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">json_schema_to_signature</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="c1"># Ensure the base URL doesn&#39;t end with a slash if the endpoint starts with one</span>
+    <span class="n">clean_base_url</span> <span class="o">=</span> <span class="n">base_url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">endpoint</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">endpoint</span>
+
+    <span class="n">full_url</span> <span class="o">=</span> <span class="n">clean_base_url</span> <span class="o">+</span> <span class="n">endpoint</span>
+    <span class="n">http_method</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="c1"># Use provided handlers or defaults</span>
+    <span class="n">_error_handler</span> <span class="o">=</span> <span class="n">error_handler</span> <span class="ow">or</span> <span class="n">default_error_handler</span>
+    <span class="n">_egress</span> <span class="o">=</span> <span class="n">egress</span> <span class="ow">or</span> <span class="n">default_response_processor</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_query_params</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">required_params</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract query parameters from all parameters&quot;&quot;&quot;</span>
+        <span class="n">query_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Check if this is a query parameter, or if the parameter is in the request body</span>
+            <span class="k">if</span> <span class="n">route</span><span class="o">.</span><span class="n">input_specs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parameters&quot;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">route_param</span> <span class="ow">in</span> <span class="n">route</span><span class="o">.</span><span class="n">input_specs</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">route_param</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">name</span>
+                        <span class="ow">and</span> <span class="n">route_param</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;in&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;query&quot;</span>
+                    <span class="p">):</span>
+                        <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Only include non-None parameters</span>
+                            <span class="n">query_params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span>
+                        <span class="k">break</span>
+        <span class="k">return</span> <span class="n">query_params</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_path_params</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract path parameters from all parameters&quot;&quot;&quot;</span>
+        <span class="n">path_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Check if this parameter is in the path</span>
+            <span class="k">if</span> <span class="n">route</span><span class="o">.</span><span class="n">input_specs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parameters&quot;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">route_param</span> <span class="ow">in</span> <span class="n">route</span><span class="o">.</span><span class="n">input_specs</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">route_param</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">name</span>
+                        <span class="ow">and</span> <span class="n">route_param</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;in&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;path&quot;</span>
+                    <span class="p">):</span>
+                        <span class="n">path_params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span>
+                        <span class="k">break</span>
+        <span class="k">return</span> <span class="n">path_params</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_body_params</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">query_params</span><span class="p">,</span> <span class="n">path_params</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract body parameters (all parameters not in query or path)&quot;&quot;&quot;</span>
+        <span class="n">body_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># If there&#39;s a requestBody in the spec, include all parameters that aren&#39;t query or path</span>
+        <span class="k">if</span> <span class="n">route</span><span class="o">.</span><span class="n">input_specs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;requestBody&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">query_params</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path_params</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Only include non-None parameters</span>
+                        <span class="n">body_params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span>
+        <span class="k">return</span> <span class="n">body_params</span>
+
+    <span class="nd">@sig</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Implementation of the {http_method} {endpoint} endpoint.</span>
+
+<span class="sd">        This function was automatically generated from the OpenAPI specification.</span>
+<span class="sd">        It sends a {http_method} request to {full_url}.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Bind the arguments to the parameters</span>
+        <span class="n">bound_args</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">bound_args</span><span class="o">.</span><span class="n">apply_defaults</span><span class="p">()</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">bound_args</span><span class="o">.</span><span class="n">arguments</span>
+
+        <span class="c1"># Extract different types of parameters</span>
+        <span class="n">query_params</span> <span class="o">=</span> <span class="n">_extract_query_params</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="n">path_params</span> <span class="o">=</span> <span class="n">_extract_path_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">body_params</span> <span class="o">=</span> <span class="n">_extract_body_params</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">query_params</span><span class="p">,</span> <span class="n">path_params</span><span class="p">)</span>
+
+        <span class="c1"># Format URL with path parameters</span>
+        <span class="n">formatted_url</span> <span class="o">=</span> <span class="n">full_url</span>
+        <span class="k">if</span> <span class="n">path_params</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">path_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">formatted_url</span> <span class="o">=</span> <span class="n">formatted_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Set up headers</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">custom_headers</span><span class="p">:</span>
+            <span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">custom_headers</span><span class="p">)</span>
+
+        <span class="c1"># Send the request using either the provided session or a new session</span>
+        <span class="n">current_session</span> <span class="o">=</span> <span class="n">session</span> <span class="ow">or</span> <span class="n">requests</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Map HTTP methods to their corresponding session methods</span>
+            <span class="n">method_map</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">method</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">current_session</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="s2">&quot;put&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="s2">&quot;patch&quot;</span><span class="p">]</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">http_method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">method_map</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported HTTP method: </span><span class="si">{</span><span class="n">http_method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">method_func</span> <span class="o">=</span> <span class="n">method_map</span><span class="p">[</span><span class="n">http_method</span><span class="p">]</span>
+
+            <span class="n">method_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">url</span><span class="o">=</span><span class="n">formatted_url</span><span class="p">,</span>
+                <span class="n">params</span><span class="o">=</span><span class="n">query_params</span><span class="p">,</span>
+                <span class="n">json</span><span class="o">=</span><span class="n">body_params</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">&quot;get&quot;</span><span class="p">:</span>
+                <span class="c1"># For GET requests, don&#39;t include the json parameter</span>
+                <span class="n">method_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="n">response</span> <span class="o">=</span> <span class="n">method_func</span><span class="p">(</span><span class="o">**</span><span class="n">method_kwargs</span><span class="p">)</span>
+
+            <span class="c1"># Handle errors</span>
+            <span class="n">_error_handler</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+            <span class="c1"># Process and return the response</span>
+            <span class="k">return</span> <span class="n">_egress</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_error_handler</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+    <span class="c1"># Set the function name and docstring -------------------------------------------</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">name_func</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Find all path parameters and replace them</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+            <span class="n">clean_endpoint</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span>
+            <span class="n">path_param_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;{([^}]+)}&#39;</span><span class="p">)</span>
+            <span class="n">clean_endpoint</span> <span class="o">=</span> <span class="n">path_param_pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;_\1_&#39;</span><span class="p">,</span> <span class="n">clean_endpoint</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">http_method</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">clean_endpoint</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="n">func</span>
+
+    <span class="n">func</span> <span class="o">=</span> <span class="n">name_func</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">method_description</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">method_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;summary&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">params_description</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">route</span><span class="o">.</span><span class="n">input_specs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parameters&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">params_description</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    </span><span class="si">{</span><span class="n">param</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">param</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="n">method_description</span><span class="si">}</span>
+<span class="s2">    </span>
+<span class="s2">    Endpoint: </span><span class="si">{</span><span class="n">http_method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="si">}</span>
+<span class="s2">    </span>
+<span class="s2">    Parameters:</span><span class="si">{</span><span class="n">params_description</span><span class="si">}</span>
+<span class="s2">    </span>
+<span class="s2">    Returns:</span>
+<span class="s2">    --------</span>
+<span class="s2">    The processed response from the API, typically as JSON.</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">func</span></div>
+
+
+
+<div class="viewcode-block" id="routes_to_funcs">
+<a class="viewcode-back" href="../../module_docs/ho/base.html#ho.base.routes_to_funcs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">routes_to_funcs</span><span class="p">(</span>
+    <span class="n">spec_or_routes</span><span class="p">,</span> <span class="n">base_url</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name_as_key</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">route_to_func_kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert all routes in an OpenAPI specification to Python functions.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    spec_or_routes : dict or ju.oas.Routes</span>
+<span class="sd">        Either an OpenAPI specification dictionary or a ju.oas.Routes instance.</span>
+<span class="sd">    base_url : str</span>
+<span class="sd">        The base URL of the web service.</span>
+<span class="sd">    name_as_key : bool, optional</span>
+<span class="sd">        If True, use the function name as the key in the returned dictionary.</span>
+<span class="sd">        If False, use a tuple of (method, endpoint) as the key.</span>
+<span class="sd">    **route_to_func_kwargs :</span>
+<span class="sd">        Additional keyword arguments to pass to route_to_func.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    dict</span>
+<span class="sd">        A dictionary mapping (method, endpoint) tuples to functions.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from ju.oas import Routes</span>
+<span class="sd">    &gt;&gt;&gt; routes = Routes(openapi_spec)  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; api_functions = routes_to_funcs(routes, &#39;https://api.example.com&#39;)  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; items = api_functions[&#39;get&#39;, &#39;/items&#39;](type=&#39;electronics&#39;)  # doctest: +SKIP</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ju.oas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Routes</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec_or_routes</span><span class="p">,</span> <span class="n">Routes</span><span class="p">):</span>
+        <span class="n">routes</span> <span class="o">=</span> <span class="n">Routes</span><span class="p">(</span><span class="n">spec_or_routes</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">routes</span> <span class="o">=</span> <span class="n">spec_or_routes</span>
+
+    <span class="n">functions</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">endpoint</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">:</span>
+        <span class="n">route</span> <span class="o">=</span> <span class="n">routes</span><span class="p">[</span><span class="n">method</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">]</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">route_to_func</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">base_url</span><span class="p">,</span> <span class="o">**</span><span class="n">route_to_func_kwargs</span><span class="p">)</span>
+        <span class="n">func</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="n">func</span><span class="o">.</span><span class="n">endpoint</span> <span class="o">=</span> <span class="n">endpoint</span>
+        <span class="k">if</span> <span class="n">name_as_key</span><span class="p">:</span>
+            <span class="c1"># Use the function name as the key</span>
+            <span class="n">functions</span><span class="p">[</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">functions</span><span class="p">[</span><span class="n">method</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
+
+    <span class="k">return</span> <span class="n">functions</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">routes_to_namespace</span><span class="p">(</span><span class="n">spec_or_routes</span><span class="p">,</span> <span class="n">base_url</span><span class="p">,</span> <span class="o">**</span><span class="n">route_to_func_kwargs</span><span class="p">):</span>
+    <span class="n">funcs</span> <span class="o">=</span> <span class="n">routes_to_funcs</span><span class="p">(</span>
+        <span class="n">spec_or_routes</span><span class="p">,</span> <span class="n">base_url</span><span class="p">,</span> <span class="n">name_as_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">route_to_func_kwargs</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">SimpleMappingNamespace</span><span class="p">(</span><span class="o">**</span><span class="n">funcs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="default_error_handler">
+<a class="viewcode-back" href="../../module_docs/ho/base.html#ho.base.default_error_handler">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_error_handler</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Default error handling: raise for status and return exception info if any&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exception</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">response</span></div>
+
+
+
+<div class="viewcode-block" id="default_response_processor">
+<a class="viewcode-back" href="../../module_docs/ho/base.html#ho.base.default_response_processor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_response_processor</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to return response as JSON, fallback to text and then content&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;text&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Content-Type&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="minimal_openapi_template">
+<a class="viewcode-back" href="../../module_docs/ho/base.html#ho.base.minimal_openapi_template">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">minimal_openapi_template</span><span class="p">(</span><span class="n">api_path</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a minimal OpenAPI template with just the essential elements.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;openapi&quot;</span><span class="p">:</span> <span class="s2">&quot;3.0.3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;paths&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="n">api_path</span><span class="p">:</span> <span class="p">{</span>
+                <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span> <span class="p">{</span>
+                    <span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+                    <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">&quot;responses&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;200&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Successful response&quot;</span><span class="p">}},</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="url_template_to_openapi">
+<a class="viewcode-back" href="../../module_docs/ho/base.html#ho.base.url_template_to_openapi">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">url_template_to_openapi</span><span class="p">(</span>
+    <span class="n">url_template</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">param_types</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_descriptions</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_defaults</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">response_schema</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">openapi_template</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a URL template with placeholders to an OpenAPI specification.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    url_template : str</span>
+<span class="sd">        URL template with placeholders in format:</span>
+<span class="sd">        - Simple: {param_name}</span>
+<span class="sd">        - With default: {param_name:default_value}</span>
+<span class="sd">    method : str, optional</span>
+<span class="sd">        HTTP method for the endpoint (default: &quot;get&quot;)</span>
+<span class="sd">    description : str, optional</span>
+<span class="sd">        Description of the endpoint</span>
+<span class="sd">    param_types : dict, optional</span>
+<span class="sd">        Dictionary mapping parameter names to their types</span>
+<span class="sd">    param_descriptions : dict, optional</span>
+<span class="sd">        Dictionary mapping parameter names to their descriptions</span>
+<span class="sd">    param_defaults : dict, optional</span>
+<span class="sd">        Dictionary mapping parameter names to their default values</span>
+<span class="sd">    response_schema : dict, optional</span>
+<span class="sd">        Schema for the response</span>
+<span class="sd">    openapi_template : dict, optional</span>
+<span class="sd">        Custom OpenAPI template to use instead of the default minimal one</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    dict</span>
+<span class="sd">        OpenAPI specification as a dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">param_types</span> <span class="o">=</span> <span class="n">param_types</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">param_descriptions</span> <span class="o">=</span> <span class="n">param_descriptions</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">param_defaults</span> <span class="o">=</span> <span class="n">param_defaults</span> <span class="ow">or</span> <span class="p">{}</span>
+
+    <span class="c1"># Parse the URL to get path and base URL</span>
+    <span class="n">parsed_url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url_template</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">path</span>
+    <span class="n">base_url</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">scheme</span><span class="si">}</span><span class="s2">://</span><span class="si">{</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">netloc</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">and</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">netloc</span>
+        <span class="k">else</span> <span class="kc">None</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Extract path parameters with optional defaults</span>
+    <span class="n">path_params_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\{([^</span><span class="si">{}</span><span class="s1">]+)\}&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="n">path_params</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Process inline defaults in path parameters</span>
+    <span class="k">for</span> <span class="n">param_match</span> <span class="ow">in</span> <span class="n">path_params_match</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">param_match</span><span class="p">:</span>
+            <span class="n">param_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="o">=</span> <span class="n">param_match</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">param_defaults</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_value</span>
+            <span class="n">path_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+            <span class="c1"># Update the path to use the parameter name without default</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">param_match</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_match</span><span class="p">)</span>
+
+    <span class="c1"># Extract query parameters from the URL template</span>
+    <span class="n">query_string</span> <span class="o">=</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">query</span>
+    <span class="n">query_params</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">query_string</span><span class="p">:</span>
+        <span class="c1"># Extract parameters from the query string</span>
+        <span class="n">template_query_params</span> <span class="o">=</span> <span class="n">parse_qs</span><span class="p">(</span><span class="n">query_string</span><span class="p">)</span>
+
+        <span class="c1"># Process each query parameter</span>
+        <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">template_query_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Check if this is a template parameter</span>
+            <span class="n">param_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\{([^</span><span class="si">{}</span><span class="s1">]+)\}&#39;</span><span class="p">,</span> <span class="n">param_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">param_match</span><span class="p">:</span>
+                <span class="c1"># This is a template parameter in the query parameter name</span>
+                <span class="n">param_content</span> <span class="o">=</span> <span class="n">param_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">param_content</span><span class="p">:</span>
+                    <span class="n">param_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="o">=</span> <span class="n">param_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">param_defaults</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_value</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">param_name</span> <span class="o">=</span> <span class="n">param_content</span>
+                <span class="n">query_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Check if the value contains a template</span>
+                <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                    <span class="n">param_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\{([^</span><span class="si">{}</span><span class="s1">]+)\}&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">param_match</span><span class="p">:</span>
+                        <span class="n">param_content</span> <span class="o">=</span> <span class="n">param_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">param_content</span><span class="p">:</span>
+                            <span class="n">param_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="o">=</span> <span class="n">param_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                            <span class="n">param_defaults</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_value</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">param_name</span> <span class="o">=</span> <span class="n">param_content</span>
+                        <span class="n">query_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+
+    <span class="c1"># Create OpenAPI spec from template or default</span>
+    <span class="k">if</span> <span class="n">openapi_template</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">openapi_spec</span> <span class="o">=</span> <span class="n">minimal_openapi_template</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+        <span class="n">openapi_spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">openapi_template</span><span class="p">)</span>
+        <span class="c1"># Make sure the path and method exist in the template</span>
+        <span class="k">if</span> <span class="s1">&#39;paths&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">:</span>
+            <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">]:</span>
+            <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="n">path</span><span class="p">]:</span>
+            <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="n">path</span><span class="p">][</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+                <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;responses&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;200&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Successful response&quot;</span><span class="p">}},</span>
+            <span class="p">}</span>
+
+    <span class="c1"># Add server information if we have a base URL</span>
+    <span class="k">if</span> <span class="n">base_url</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;servers&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">:</span>
+            <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;servers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;servers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">base_url</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Generated from URL template&quot;</span><span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Add parameters to the spec</span>
+    <span class="n">endpoint_spec</span> <span class="o">=</span> <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="n">path</span><span class="p">][</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+    <span class="k">if</span> <span class="s1">&#39;parameters&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpoint_spec</span><span class="p">:</span>
+        <span class="n">endpoint_spec</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Add path parameters</span>
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">path_params</span><span class="p">:</span>
+        <span class="n">param_spec</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">param</span><span class="p">,</span>
+            <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="s2">&quot;path&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">param_types</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s2">&quot;string&quot;</span><span class="p">)},</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">param_descriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Parameter </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">param_defaults</span><span class="p">:</span>
+            <span class="n">param_spec</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">][</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_defaults</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
+
+        <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_spec</span><span class="p">)</span>
+
+    <span class="c1"># Add query parameters</span>
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">query_params</span><span class="p">:</span>
+        <span class="n">param_spec</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">param</span><span class="p">,</span>
+            <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="s2">&quot;query&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="n">param</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param_defaults</span><span class="p">,</span>
+            <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">param_types</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s2">&quot;string&quot;</span><span class="p">)},</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">param_descriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Parameter </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">param_defaults</span><span class="p">:</span>
+            <span class="n">param_spec</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">][</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_defaults</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
+
+        <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_spec</span><span class="p">)</span>
+
+    <span class="c1"># Add response schema if provided</span>
+    <span class="k">if</span> <span class="n">response_schema</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;responses&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpoint_spec</span><span class="p">:</span>
+            <span class="n">endpoint_spec</span><span class="p">[</span><span class="s1">&#39;responses&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="s1">&#39;200&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpoint_spec</span><span class="p">[</span><span class="s1">&#39;responses&#39;</span><span class="p">]:</span>
+            <span class="n">endpoint_spec</span><span class="p">[</span><span class="s1">&#39;responses&#39;</span><span class="p">][</span><span class="s1">&#39;200&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Successful response&quot;</span><span class="p">}</span>
+
+        <span class="n">endpoint_spec</span><span class="p">[</span><span class="s1">&#39;responses&#39;</span><span class="p">][</span><span class="s1">&#39;200&#39;</span><span class="p">][</span><span class="s1">&#39;content&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;application/json&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">response_schema</span><span class="p">}</span>
+        <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">openapi_spec</span></div>
+
+
+
+<div class="viewcode-block" id="url_template_to_func">
+<a class="viewcode-back" href="../../module_docs/ho/base.html#ho.base.url_template_to_func">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">url_template_to_func</span><span class="p">(</span>
+    <span class="n">url_template</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">param_types</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_descriptions</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_defaults</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">response_schema</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">openapi_template</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">session</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">error_handler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">egress</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">custom_headers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a URL template directly to a Python function.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    url_template : str</span>
+<span class="sd">        URL template with placeholders in format:</span>
+<span class="sd">        - Simple: {param_name}</span>
+<span class="sd">        - With default: {param_name:default_value}</span>
+<span class="sd">        Examples:</span>
+<span class="sd">        - &quot;https://example.com/mall/{store}/{item_id:1}&quot;</span>
+<span class="sd">        - &quot;https://www.google.com/search?q={search_term}&quot;</span>
+<span class="sd">    method : str, optional</span>
+<span class="sd">        HTTP method for the endpoint (default: &quot;get&quot;)</span>
+<span class="sd">    description : str, optional</span>
+<span class="sd">        Description of the endpoint</span>
+<span class="sd">    param_types : dict, optional</span>
+<span class="sd">        Dictionary mapping parameter names to their types (string, integer, etc.)</span>
+<span class="sd">    param_descriptions : dict, optional</span>
+<span class="sd">        Dictionary mapping parameter names to their descriptions</span>
+<span class="sd">    param_defaults : dict, optional</span>
+<span class="sd">        Dictionary mapping parameter names to their default values</span>
+<span class="sd">    response_schema : dict, optional</span>
+<span class="sd">        Schema for the response</span>
+<span class="sd">    openapi_template : dict, optional</span>
+<span class="sd">        Custom OpenAPI template instead of using the minimal default</span>
+<span class="sd">    session : requests.Session, optional</span>
+<span class="sd">        A session object to use for requests</span>
+<span class="sd">    error_handler : callable, optional</span>
+<span class="sd">        A function to handle request errors</span>
+<span class="sd">    timeout : int, optional</span>
+<span class="sd">        Request timeout in seconds</span>
+<span class="sd">    egress : callable, optional</span>
+<span class="sd">        A function to process the response before returning</span>
+<span class="sd">    custom_headers : dict, optional</span>
+<span class="sd">        Custom headers to include in all requests</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    callable</span>
+<span class="sd">        A Python function that implements the URL template</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; search_google = url_template_to_func(</span>
+<span class="sd">    ...     &quot;https://www.google.com/search?q={search_term}&quot;,</span>
+<span class="sd">    ...     description=&quot;Search Google&quot;,</span>
+<span class="sd">    ...     egress=lambda response: response.text</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; results = search_google(search_term=&quot;Python&quot;)</span>
+
+<span class="sd">    &gt;&gt;&gt; # Example using REST Countries API with path and query parameters</span>
+<span class="sd">    &gt;&gt;&gt; get_country = url_template_to_func(</span>
+<span class="sd">    ...     &quot;https://restcountries.com/v3.1/name/{country_name}?fullText={full_text:false}&amp;fields={fields:name,capital,population}&quot;,</span>
+<span class="sd">    ...     description=&quot;Get country information by name&quot;,</span>
+<span class="sd">    ...     param_types={&quot;country_name&quot;: &quot;string&quot;, &quot;full_text&quot;: &quot;boolean&quot;, &quot;fields&quot;: &quot;string&quot;},</span>
+<span class="sd">    ...     param_descriptions={</span>
+<span class="sd">    ...         &quot;country_name&quot;: &quot;Name of the country to search for&quot;,</span>
+<span class="sd">    ...         &quot;full_text&quot;: &quot;Whether to match the full text of the name (true) or partial match (false)&quot;,</span>
+<span class="sd">    ...         &quot;fields&quot;: &quot;Comma-separated list of fields to include in the response&quot;</span>
+<span class="sd">    ...     }</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; import inspect</span>
+<span class="sd">    &gt;&gt;&gt; print(inspect.signature(get_country))  # View the generated function signature</span>
+<span class="sd">    (country_name: str, full_text: bool = &#39;false&#39;, fields: str = &#39;name,capital,population&#39;)</span>
+
+<span class="sd">    &gt;&gt;&gt; # Example using TheMealDB API with multiple query parameters</span>
+<span class="sd">    &gt;&gt;&gt; search_meals = url_template_to_func(</span>
+<span class="sd">    ...     &quot;https://www.themealdb.com/api/json/v1/1/filter.php?c={category:Dessert}&amp;a={area:}&quot;,</span>
+<span class="sd">    ...     description=&quot;Search for meals by category and area&quot;,</span>
+<span class="sd">    ...     param_types={&quot;category&quot;: &quot;string&quot;, &quot;area&quot;: &quot;string&quot;},</span>
+<span class="sd">    ...     param_descriptions={</span>
+<span class="sd">    ...         &quot;category&quot;: &quot;The category of meals to search for (e.g., Seafood, Dessert)&quot;,</span>
+<span class="sd">    ...         &quot;area&quot;: &quot;The area/country of origin (optional, e.g., Italian, American)&quot;</span>
+<span class="sd">    ...     }</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; # search_meals can be called with either or both parameters:</span>
+<span class="sd">    &gt;&gt;&gt; # italian_desserts = search_meals(area=&quot;Italian&quot;)  # Uses default category=&quot;Dessert&quot;</span>
+<span class="sd">    &gt;&gt;&gt; # seafood_meals = search_meals(category=&quot;Seafood&quot;)  # No area specified</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Parse the URL to get base URL</span>
+    <span class="n">parsed_url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url_template</span><span class="p">)</span>
+    <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">scheme</span><span class="si">}</span><span class="s2">://</span><span class="si">{</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">netloc</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Convert URL template to OpenAPI spec</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">url_template_to_openapi</span><span class="p">(</span>
+        <span class="n">url_template</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+        <span class="n">param_types</span><span class="o">=</span><span class="n">param_types</span><span class="p">,</span>
+        <span class="n">param_descriptions</span><span class="o">=</span><span class="n">param_descriptions</span><span class="p">,</span>
+        <span class="n">param_defaults</span><span class="o">=</span><span class="n">param_defaults</span><span class="p">,</span>
+        <span class="n">response_schema</span><span class="o">=</span><span class="n">response_schema</span><span class="p">,</span>
+        <span class="n">openapi_template</span><span class="o">=</span><span class="n">openapi_template</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Create Routes object</span>
+    <span class="n">routes</span> <span class="o">=</span> <span class="n">Routes</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+
+    <span class="c1"># Get the path from the spec (should be only one)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Convert route to function</span>
+    <span class="n">route_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;session&#39;</span><span class="p">:</span> <span class="n">session</span><span class="p">,</span>
+        <span class="s1">&#39;error_handler&#39;</span><span class="p">:</span> <span class="n">error_handler</span><span class="p">,</span>
+        <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">timeout</span><span class="p">,</span>
+        <span class="s1">&#39;egress&#39;</span><span class="p">:</span> <span class="n">egress</span><span class="p">,</span>
+        <span class="s1">&#39;custom_headers&#39;</span><span class="p">:</span> <span class="n">custom_headers</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="c1"># Remove None values to use defaults in route_to_func</span>
+    <span class="n">route_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">route_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">route_to_func</span><span class="p">(</span><span class="n">routes</span><span class="p">[</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">path</span><span class="p">],</span> <span class="n">base_url</span><span class="p">,</span> <span class="o">**</span><span class="n">route_kwargs</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
