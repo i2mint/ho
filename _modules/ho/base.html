@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ho.base &mdash; ho 0.0.6 documentation</title>
+  <title>ho.base &mdash; ho 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1fd71caa"></script>
+      <script src="../../_static/documentation_options.js?v=bbaf98b3"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -88,7 +88,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">ju.oas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Route</span><span class="p">,</span> <span class="n">Routes</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ho.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleMappingNamespace</span>
-
 
 
 <div class="viewcode-block" id="update_spec">
@@ -441,18 +440,18 @@
     <span class="c1"># Try to get base_url from the OpenAPI spec if not provided</span>
     <span class="k">if</span> <span class="n">base_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Look for servers in the OpenAPI spec</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="s1">&#39;spec&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;servers&#39;</span> <span class="ow">in</span> <span class="n">route</span><span class="o">.</span><span class="n">spec</span> <span class="ow">and</span> <span class="n">route</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s1">&#39;servers&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="s2">&quot;spec&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;servers&quot;</span> <span class="ow">in</span> <span class="n">route</span><span class="o">.</span><span class="n">spec</span> <span class="ow">and</span> <span class="n">route</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;servers&quot;</span><span class="p">]:</span>
             <span class="c1"># Use the first server URL as the base URL</span>
-            <span class="n">base_url</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s1">&#39;servers&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
+            <span class="n">base_url</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;servers&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Special case for URL templates that already include base URL</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">Route</span><span class="p">)</span> <span class="ow">and</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">Route</span><span class="p">)</span> <span class="ow">and</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;http&quot;</span><span class="p">):</span>
                 <span class="c1"># For URL templates with full URLs as endpoints</span>
                 <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="p">)</span>
                 <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parsed</span><span class="o">.</span><span class="n">scheme</span><span class="si">}</span><span class="s2">://</span><span class="si">{</span><span class="n">parsed</span><span class="o">.</span><span class="n">netloc</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="c1"># Adjust the endpoint to be just the path</span>
                 <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="p">(</span>
-                    <span class="s1">&#39;?&#39;</span> <span class="o">+</span> <span class="n">parsed</span><span class="o">.</span><span class="n">query</span> <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">query</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+                    <span class="s2">&quot;?&quot;</span> <span class="o">+</span> <span class="n">parsed</span><span class="o">.</span><span class="n">query</span> <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">query</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -463,10 +462,10 @@
     <span class="n">sig</span> <span class="o">=</span> <span class="n">json_schema_to_signature</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
 
     <span class="c1"># Ensure the base URL doesn&#39;t end with a slash if the endpoint starts with one</span>
-    <span class="n">clean_base_url</span> <span class="o">=</span> <span class="n">base_url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">clean_base_url</span> <span class="o">=</span> <span class="n">base_url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
     <span class="n">endpoint</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">endpoint</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
-        <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">endpoint</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">endpoint</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">):</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">endpoint</span>
 
     <span class="n">full_url</span> <span class="o">=</span> <span class="n">clean_base_url</span> <span class="o">+</span> <span class="n">endpoint</span>
     <span class="n">http_method</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -539,9 +538,7 @@
         <span class="n">formatted_url</span> <span class="o">=</span> <span class="n">full_url</span>
         <span class="k">if</span> <span class="n">path_params</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">path_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">formatted_url</span> <span class="o">=</span> <span class="n">formatted_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-                <span class="p">)</span>
+                <span class="n">formatted_url</span> <span class="o">=</span> <span class="n">formatted_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
 
         <span class="c1"># Set up headers</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
@@ -594,8 +591,8 @@
             <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 
             <span class="n">clean_endpoint</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span>
-            <span class="n">path_param_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;{([^}]+)}&#39;</span><span class="p">)</span>
-            <span class="n">clean_endpoint</span> <span class="o">=</span> <span class="n">path_param_pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;_\1_&#39;</span><span class="p">,</span> <span class="n">clean_endpoint</span><span class="p">)</span>
+            <span class="n">path_param_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;{([^}]+)}&quot;</span><span class="p">)</span>
+            <span class="n">clean_endpoint</span> <span class="o">=</span> <span class="n">path_param_pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;_\1_&quot;</span><span class="p">,</span> <span class="n">clean_endpoint</span><span class="p">)</span>
             <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">http_method</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">clean_endpoint</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="n">name</span>
@@ -705,7 +702,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s1">&#39;text&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Content-Type&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s2">&quot;text&quot;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
         <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span></div>
 
@@ -789,13 +786,13 @@
     <span class="p">)</span>
 
     <span class="c1"># Extract path parameters with optional defaults</span>
-    <span class="n">path_params_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\{([^</span><span class="si">{}</span><span class="s1">]+)\}&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="n">path_params_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{([^</span><span class="si">{}</span><span class="s2">]+)\}&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
     <span class="n">path_params</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Process inline defaults in path parameters</span>
     <span class="k">for</span> <span class="n">param_match</span> <span class="ow">in</span> <span class="n">path_params_match</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">param_match</span><span class="p">:</span>
-            <span class="n">param_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="o">=</span> <span class="n">param_match</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">param_match</span><span class="p">:</span>
+            <span class="n">param_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="o">=</span> <span class="n">param_match</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">param_defaults</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_value</span>
             <span class="n">path_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
             <span class="c1"># Update the path to use the parameter name without default</span>
@@ -814,12 +811,12 @@
         <span class="c1"># Process each query parameter</span>
         <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">template_query_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># Check if this is a template parameter</span>
-            <span class="n">param_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\{([^</span><span class="si">{}</span><span class="s1">]+)\}&#39;</span><span class="p">,</span> <span class="n">param_name</span><span class="p">)</span>
+            <span class="n">param_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{([^</span><span class="si">{}</span><span class="s2">]+)\}&quot;</span><span class="p">,</span> <span class="n">param_name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">param_match</span><span class="p">:</span>
                 <span class="c1"># This is a template parameter in the query parameter name</span>
                 <span class="n">param_content</span> <span class="o">=</span> <span class="n">param_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-                <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">param_content</span><span class="p">:</span>
-                    <span class="n">param_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="o">=</span> <span class="n">param_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">param_content</span><span class="p">:</span>
+                    <span class="n">param_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="o">=</span> <span class="n">param_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                     <span class="n">param_defaults</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_value</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">param_name</span> <span class="o">=</span> <span class="n">param_content</span>
@@ -827,11 +824,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Check if the value contains a template</span>
                 <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
-                    <span class="n">param_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\{([^</span><span class="si">{}</span><span class="s1">]+)\}&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="n">param_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{([^</span><span class="si">{}</span><span class="s2">]+)\}&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">param_match</span><span class="p">:</span>
                         <span class="n">param_content</span> <span class="o">=</span> <span class="n">param_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">param_content</span><span class="p">:</span>
-                            <span class="n">param_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="o">=</span> <span class="n">param_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">param_content</span><span class="p">:</span>
+                            <span class="n">param_name</span><span class="p">,</span> <span class="n">default_value</span> <span class="o">=</span> <span class="n">param_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                             <span class="n">param_defaults</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_value</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">param_name</span> <span class="o">=</span> <span class="n">param_content</span>
@@ -845,12 +842,12 @@
 
         <span class="n">openapi_spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">openapi_template</span><span class="p">)</span>
         <span class="c1"># Make sure the path and method exist in the template</span>
-        <span class="k">if</span> <span class="s1">&#39;paths&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">:</span>
-            <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="n">path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">]:</span>
-            <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="n">path</span><span class="p">]:</span>
-            <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="n">path</span><span class="p">][</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="s2">&quot;paths&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">:</span>
+            <span class="n">openapi_spec</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">]:</span>
+            <span class="n">openapi_spec</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">][</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">][</span><span class="n">path</span><span class="p">]:</span>
+            <span class="n">openapi_spec</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">][</span><span class="n">path</span><span class="p">][</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
                 <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="p">[],</span>
                 <span class="s2">&quot;responses&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;200&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Successful response&quot;</span><span class="p">}},</span>
@@ -858,16 +855,16 @@
 
     <span class="c1"># Add server information if we have a base URL</span>
     <span class="k">if</span> <span class="n">base_url</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s1">&#39;servers&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">:</span>
-            <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;servers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;servers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="k">if</span> <span class="s2">&quot;servers&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openapi_spec</span><span class="p">:</span>
+            <span class="n">openapi_spec</span><span class="p">[</span><span class="s2">&quot;servers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">openapi_spec</span><span class="p">[</span><span class="s2">&quot;servers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">base_url</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Generated from URL template&quot;</span><span class="p">}</span>
         <span class="p">)</span>
 
     <span class="c1"># Add parameters to the spec</span>
-    <span class="n">endpoint_spec</span> <span class="o">=</span> <span class="n">openapi_spec</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="n">path</span><span class="p">][</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
-    <span class="k">if</span> <span class="s1">&#39;parameters&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpoint_spec</span><span class="p">:</span>
-        <span class="n">endpoint_spec</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">endpoint_spec</span> <span class="o">=</span> <span class="n">openapi_spec</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">][</span><span class="n">path</span><span class="p">][</span><span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+    <span class="k">if</span> <span class="s2">&quot;parameters&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpoint_spec</span><span class="p">:</span>
+        <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Add path parameters</span>
     <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">path_params</span><span class="p">:</span>
@@ -901,12 +898,12 @@
 
     <span class="c1"># Add response schema if provided</span>
     <span class="k">if</span> <span class="n">response_schema</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s1">&#39;responses&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpoint_spec</span><span class="p">:</span>
-            <span class="n">endpoint_spec</span><span class="p">[</span><span class="s1">&#39;responses&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="s1">&#39;200&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpoint_spec</span><span class="p">[</span><span class="s1">&#39;responses&#39;</span><span class="p">]:</span>
-            <span class="n">endpoint_spec</span><span class="p">[</span><span class="s1">&#39;responses&#39;</span><span class="p">][</span><span class="s1">&#39;200&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Successful response&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="s2">&quot;responses&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpoint_spec</span><span class="p">:</span>
+            <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="s2">&quot;200&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">]:</span>
+            <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">][</span><span class="s2">&quot;200&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Successful response&quot;</span><span class="p">}</span>
 
-        <span class="n">endpoint_spec</span><span class="p">[</span><span class="s1">&#39;responses&#39;</span><span class="p">][</span><span class="s1">&#39;200&#39;</span><span class="p">][</span><span class="s1">&#39;content&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">][</span><span class="s2">&quot;200&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;application/json&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">response_schema</span><span class="p">}</span>
         <span class="p">}</span>
 
@@ -1037,11 +1034,11 @@
 
     <span class="c1"># Convert route to function</span>
     <span class="n">route_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;session&#39;</span><span class="p">:</span> <span class="n">session</span><span class="p">,</span>
-        <span class="s1">&#39;error_handler&#39;</span><span class="p">:</span> <span class="n">error_handler</span><span class="p">,</span>
-        <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">timeout</span><span class="p">,</span>
-        <span class="s1">&#39;egress&#39;</span><span class="p">:</span> <span class="n">egress</span><span class="p">,</span>
-        <span class="s1">&#39;custom_headers&#39;</span><span class="p">:</span> <span class="n">custom_headers</span><span class="p">,</span>
+        <span class="s2">&quot;session&quot;</span><span class="p">:</span> <span class="n">session</span><span class="p">,</span>
+        <span class="s2">&quot;error_handler&quot;</span><span class="p">:</span> <span class="n">error_handler</span><span class="p">,</span>
+        <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="n">timeout</span><span class="p">,</span>
+        <span class="s2">&quot;egress&quot;</span><span class="p">:</span> <span class="n">egress</span><span class="p">,</span>
+        <span class="s2">&quot;custom_headers&quot;</span><span class="p">:</span> <span class="n">custom_headers</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># Remove None values to use defaults in route_to_func</span>
     <span class="n">route_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">route_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
