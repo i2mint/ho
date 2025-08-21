@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ho.util &mdash; ho 0.0.7 documentation</title>
+  <title>ho.util &mdash; ho 0.0.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=bbaf98b3"></script>
+      <script src="../../_static/documentation_options.js?v=53b53b71"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -50,11 +50,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../ho.html">ho</a></li>
 <li class="toctree-l1"><a class="reference internal" href="base.html">ho.base</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ho.util</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#ho.util.SimpleMappingNamespace"><code class="docutils literal notranslate"><span class="pre">SimpleMappingNamespace</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ho.util.extract_placeholders"><code class="docutils literal notranslate"><span class="pre">extract_placeholders()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ho.util</a></li>
 </ul>
 
         </div>
@@ -81,51 +77,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-ho.util">
-<span id="ho-util"></span><h1>ho.util<a class="headerlink" href="#module-ho.util" title="Link to this heading"></a></h1>
-<p>Utils for HO</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="ho.util.SimpleMappingNamespace">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ho.util.</span></span><span class="sig-name descname"><span class="pre">SimpleMappingNamespace</span></span><a class="reference internal" href="../../_modules/ho/util.html#SimpleMappingNamespace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.util.SimpleMappingNamespace" title="Link to this definition"></a></dt>
-<dd><p>A simple mapping namespace that allows attribute access and dictionary-like access.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">SimpleMappingNamespace</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-<span class="go">[&#39;a&#39;, &#39;b&#39;]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">a</span>
-<span class="go">1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">]</span>
-<span class="go">2</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ho.util.extract_placeholders">
-<span class="sig-prename descclassname"><span class="pre">ho.util.</span></span><span class="sig-name descname"><span class="pre">extract_placeholders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url_template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/ho/util.html#extract_placeholders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.util.extract_placeholders" title="Link to this definition"></a></dt>
-<dd><p>Extract all placeholders from a URL template, including their inline defaults.</p>
-<section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>url_template<span class="classifier">str</span></dt><dd><p>URL template with placeholders</p>
-</dd>
-</dl>
-</section>
-<section id="returns">
-<h2>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>dict</dt><dd><p>A dictionary mapping parameter names to their default values (if specified)</p>
-</dd>
-</dl>
-</section>
-<section id="example">
-<h2>Example:<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">extract_placeholders</span><span class="p">(</span><span class="s2">&quot;https://example.com/{category:books}/items?page=</span><span class="si">{page:1}</span><span class="s2">&amp;limit=</span><span class="si">{limit:10}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="go">{&#39;category&#39;: &#39;books&#39;, &#39;page&#39;: &#39;1&#39;, &#39;limit&#39;: &#39;10&#39;}</span>
-</pre></div>
-</div>
-</section>
-</dd></dl>
-
+  <section id="ho-util">
+<h1>ho.util<a class="headerlink" href="#ho-util" title="Link to this heading"></a></h1>
 </section>
 
 
