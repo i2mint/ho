@@ -1,6 +1,6 @@
 """Utils for HO"""
 
-from typing import Mapping
+from collections.abc import Mapping
 from types import SimpleNamespace
 
 

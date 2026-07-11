@@ -1,7 +1,8 @@
 """HO base objects"""
 
 import re
-from typing import Optional, Callable
+from typing import Optional
+from collections.abc import Callable
 from urllib.parse import urlparse, parse_qs, quote
 
 import requests
@@ -262,16 +263,16 @@ def default_route_maker(
 
 def route_to_func(
     route,
-    base_url: Optional[str] = None,
+    base_url: str | None = None,
     *,
     route_maker=None,
     method: str = "get",
     session=None,
     error_handler=None,
     timeout=30,
-    egress: Optional[Callable] = None,
+    egress: Callable | None = None,
     custom_headers=None,
-    name: Optional[str] = None,
+    name: str | None = None,
     # arguments for customizing the route specification:
     description: str = "",
     param_types: dict = None,

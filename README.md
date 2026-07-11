@@ -227,7 +227,7 @@ Most OpenAPI tools like [OpenAPI Generator](https://openapi-generator.tech/) gen
 ## Installation
 
 ```bash
-pip install ho-openapi
+pip install ho
 ```
 
 ## License
