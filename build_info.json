@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "built_at": "2026-10-12T18:19:58Z",
+  "package": {
+    "name": "ho",
+    "version": "0.0.11",
+    "display_name": "ho",
+    "source": "setup.cfg"
+  },
+  "git": {
+    "available": true,
+    "commit": "c8cae819500ff6e8ce7406b4145f39d9d349e57c",
+    "short_commit": "c8cae81",
+    "branch": "master",
+    "tags": [
+      "0.0.11"
+    ],
+    "dirty": false,
+    "remote_url": "https://github.com/i2mint/ho",
+    "commit_url": "https://github.com/i2mint/ho/commit/c8cae819500ff6e8ce7406b4145f39d9d349e57c",
+    "error": null
+  },
+  "ci": {
+    "provider": "github",
+    "repository": "i2mint/ho",
+    "sha": "68ca2f6011647bf8bde7ad1f0debd0f42cc35bb8",
+    "sha_in_history": true,
+    "ref": "refs/heads/master",
+    "ref_name": "master",
+    "run_id": "38289956674",
+    "run_url": "https://github.com/i2mint/ho/actions/runs/38289956674",
+    "server_url": "https://github.com"
+  },
+  "tools": {
+    "epythet": "0.2.12",
+    "sphinx": "9.1.0",
+    "docutils": "0.22.4",
+    "python": "3.12.15"
+  },
+  "config": {
+    "theme": "auto",
+    "html_theme": "shibuya",
+    "accent": "#555f00",
+    "mode": "auto",
+    "api_generator": "autosummary",
+    "ignore": [
+      "tests/",
+      "scrap/",
+      "examples/"
+    ],
+    "agent_outputs": true,
+    "aggregates": [
+      "md"
+    ],
+    "ai_artifacts": true,
+    "provenance": true,
+    "docs_dir": "docsrc"
+  },
+  "site": {
+    "modules_documented": 3,
+    "objects_documented": 11
+  },
+  "pypi": {
+    "checked": true,
+    "latest": "0.0.11",
+    "relation": "same",
+    "error": null
+  },
+  "reproduce": "git clone https://github.com/i2mint/ho && cd ho\ngit checkout c8cae819500ff6e8ce7406b4145f39d9d349e57c\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "warnings": [],
+  "alignment": {
+    "aligned": true,
+    "notes": []
+  }
+}

@@ -1,132 +1,392 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+<html lang="en" data-accent-color="yellow" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to ho’s documentation! &mdash; ho 0.0.9 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
-      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ho</title><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="API reference" href="api.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d88b86f9" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="ho"/>
+    <meta name="twitter:card" content="summary"/>
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=f7cdbf68"></script>
+<link rel="alternate" type="text/markdown" href="index.html.md">
+<link rel="describedby" href="llms.txt" type="text/markdown">
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="#">
+      
+      
+      <strong>ho</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/i2mint/ho" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/ho.html">ho</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/ho.base.html">ho.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/ho.util.html">ho.util</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ai-agents.html">For AI agents</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#">ho</a><ul>
+<li><a class="reference internal" href="#quick-start">Quick Start</a></li>
+<li><a class="reference internal" href="#how-it-works">How It Works</a></li>
+<li><a class="reference internal" href="#more-examples">More Examples</a><ul>
+<li><a class="reference internal" href="#path-parameters-with-default-values">Path Parameters with Default Values</a></li>
+<li><a class="reference internal" href="#custom-headers-and-authentication">Custom Headers and Authentication</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#more-non-runnable-examples">More (non runnable) examples</a><ul>
+<li><a class="reference internal" href="#post-requests-with-json-body">POST Requests with JSON Body</a></li>
+<li><a class="reference internal" href="#working-with-full-openapi-specifications">Working with Full OpenAPI Specifications</a></li>
+<li><a class="reference internal" href="#advanced-features">Advanced Features</a><ul>
+<li><a class="reference internal" href="#custom-response-processing">Custom Response Processing</a></li>
+<li><a class="reference internal" href="#error-handling">Error Handling</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#why-use-this-library">Why Use This Library?</a></li>
+<li><a class="reference internal" href="#comparison-to-other-tools">Comparison to Other Tools</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="#"><span itemprop="name">ho</span></a>
+        <meta itemprop="position" content="1" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue dark-code" role="main">
+          <!-- generated by epythet -->
+<section id="ho">
+<h1>ho<a class="headerlink" href="#ho" title="Link to this heading">#</a></h1>
+<p>Http Objects - Tools to make python interfaces to http services.</p>
+<p>Technically speaking, this is lightweight Python library for turning URL templates and OpenAPI specifications into usable Python functions.</p>
+<p>Informally speaking, this package gives you tools to make task-specific python objects that talk to the internet.</p>
+<p>To install:	<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">ho</span></code></p>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">#</a></h2>
+<p>The most common scenario: You have a URL template with placeholders and want to quickly create a Python function to make API calls:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">ho</span><span class="w"> </span><span class="kn">import</span> <span class="n">route_to_func</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="c1"># Create a function from a URL template</span>
+</span><span data-line="4"><span class="n">search_google</span> <span class="o">=</span> <span class="n">route_to_func</span><span class="p">(</span><span class="s2">"https://www.google.com/search?q=</span><span class="si">{search_term}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="c1"># Use the function as if it were hand-written</span>
+</span><span data-line="7"><span class="n">results</span> <span class="o">=</span> <span class="n">search_google</span><span class="p">(</span><span class="s2">"python openapi"</span><span class="p">)</span>
+</span><span data-line="8"><span class="n">results</span><span class="p">[:</span><span class="mi">40</span><span class="p">]</span> <span class="o">+</span> <span class="s1">'...'</span> <span class="o">+</span> <span class="n">results</span><span class="p">[</span><span class="o">-</span><span class="mi">20</span><span class="p">:]</span>
+</span></pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">'&lt;!doctype html&gt;&lt;html itemscope="" itemty...      &lt;/body&gt;&lt;/html&gt;'
+</span></pre></div>
+</div>
+<p>That’s it! The library handles parameter extraction, HTTP requests, and response processing automatically.</p>
+<p>Well. Not really “that’s it”. Of course, there’s many more control parameters to extend this further. Let’s have a look at a few.</p>
+</section>
+<section id="how-it-works">
+<h2>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading">#</a></h2>
+<p>This is what happened under the hood, when you do just a <code class="docutils literal notranslate"><span class="pre">func</span> <span class="pre">=</span> <span class="pre">route_to_func(url_template)</span></code>.</p>
+<ol class="arabic simple">
+<li><p>Parses your URL template</p></li>
+<li><p>Generates an <a class="reference external" href="https://www.openapis.org/">OpenAPI Specification</a> (formerly known as Swagger)</p></li>
+<li><p>Creates a Python function with the correct signature based on this specification</p></li>
+<li><p>Sets up all the necessary HTTP request handling</p></li>
+</ol>
+<p>Of course, there’s a much more direct route from a url template to a function.
+You can specify pretty much any aspect of a webservice API, using the OpenAPI Specification.
+We chose to go via the OpenAPI specification because it enables us to quickly connect to a
+<a class="reference external" href="https://openapi.tools/">huge ecosystem of other tools</a> you’ll then be able to use.</p>
+<p>The <a class="reference external" href="https://swagger.io/specification/">OpenAPI Specification</a> is an <a class="reference external" href="https://theirstack.com/en/technology/openapi-specification">industry standard</a> for describing HTTP APIs in a language-agnostic way.
+Today, most significant APIs publish such specifications, enabling automatic
+<a class="reference external" href="https://openapi-generator.tech/docs/generators/">code generation</a> in various programming languages.</p>
+<p>While traditional approaches often use static code generation, this library provides a dynamic runtime solution to create Python interfaces to HTTP services using OpenAPI specifications.</p>
+<p>Now, it’s not always what you want. Once your API is stable, static code is usually a better idea. But in many cases, you don’t want to have to generate static code, put it in your python path, import it, and all that jazz.</p>
+<p>This is when <code class="docutils literal notranslate"><span class="pre">ho</span></code> is the tool you want.</p>
+</section>
+<section id="more-examples">
+<h2>More Examples<a class="headerlink" href="#more-examples" title="Link to this heading">#</a></h2>
+<section id="path-parameters-with-default-values">
+<h3>Path Parameters with Default Values<a class="headerlink" href="#path-parameters-with-default-values" title="Link to this heading">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># URL with path and query parameters including defaults</span>
+</span><span data-line="2"><span class="n">get_country</span> <span class="o">=</span> <span class="n">route_to_func</span><span class="p">(</span>
+</span><span data-line="3">    <span class="s2">"https://restcountries.com/v3.1/name/</span><span class="si">{country_name}</span><span class="s2">?fullText={full_text:false}"</span><span class="p">,</span>
+</span><span data-line="4">    <span class="n">description</span><span class="o">=</span><span class="s2">"Get country information by name"</span><span class="p">,</span>
+</span><span data-line="5">    <span class="n">param_types</span><span class="o">=</span><span class="p">{</span><span class="s2">"country_name"</span><span class="p">:</span> <span class="s2">"string"</span><span class="p">,</span> <span class="s2">"full_text"</span><span class="p">:</span> <span class="s2">"boolean"</span><span class="p">}</span>
+</span><span data-line="6"><span class="p">)</span>
+</span><span data-line="7">
+</span><span data-line="8"><span class="c1"># Call with required parameters, using defaults for the rest</span>
+</span><span data-line="9"><span class="n">countries</span> <span class="o">=</span> <span class="n">get_country</span><span class="p">(</span><span class="n">country_name</span><span class="o">=</span><span class="s2">"germany"</span><span class="p">)</span>
+</span><span data-line="10">
+</span><span data-line="11"><span class="c1"># Or override the defaults</span>
+</span><span data-line="12"><span class="n">exact_match</span> <span class="o">=</span> <span class="n">get_country</span><span class="p">(</span><span class="n">country_name</span><span class="o">=</span><span class="s2">"germany"</span><span class="p">,</span> <span class="n">full_text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="custom-headers-and-authentication">
+<h3>Custom Headers and Authentication<a class="headerlink" href="#custom-headers-and-authentication" title="Link to this heading">#</a></h3>
+<p>This is to demo cases where the API needs authentication.</p>
+<p>The example will work only if you have a GitHub token that you placed in an environmental variable called <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>.</p>
+<p>(If you don’t have one, go get one, it’s free! We like free!)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># API requiring authentication</span>
+</span><span data-line="2"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span> 
+</span><span data-line="3">
+</span><span data-line="4"><span class="n">github_api</span> <span class="o">=</span> <span class="n">route_to_func</span><span class="p">(</span>
+</span><span data-line="5">    <span class="s2">"https://api.github.com/repos/</span><span class="si">{owner}</span><span class="s2">/</span><span class="si">{repo}</span><span class="s2">/issues"</span><span class="p">,</span>
+</span><span data-line="6">    <span class="n">description</span><span class="o">=</span><span class="s2">"List issues for a repository"</span><span class="p">,</span>
+</span><span data-line="7">    <span class="n">custom_headers</span><span class="o">=</span><span class="p">{</span>
+</span><span data-line="8">        <span class="s2">"Authorization"</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"GITHUB_TOKEN"</span><span class="p">),</span>
+</span><span data-line="9">        <span class="s2">"Accept"</span><span class="p">:</span> <span class="s2">"application/vnd.github.v3+json"</span>
+</span><span data-line="10">    <span class="p">}</span>
+</span><span data-line="11"><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Let’s play with that:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">issues</span> <span class="o">=</span> <span class="n">github_api</span><span class="p">(</span><span class="n">owner</span><span class="o">=</span><span class="s2">"openai"</span><span class="p">,</span> <span class="n">repo</span><span class="o">=</span><span class="s2">"openai-python"</span><span class="p">)</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">first_issue</span> <span class="o">=</span> <span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">issues</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="4"><span class="k">if</span> <span class="n">first_issue</span><span class="p">:</span>
+</span><span data-line="5">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Issue fields: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">first_issue</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="6">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"First issue title: </span><span class="si">{</span><span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">'title'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="7">
+</span></pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">Issue fields: ['url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'html_url', 'id', 'node_id', 'number', 'title', 'user', 'labels', 'state', 'locked', 'assignee', 'assignees', 'milestone', 'comments', 'created_at', 'updated_at', 'closed_at', 'author_association', 'type', 'active_lock_reason', 'draft', 'pull_request', 'body', 'closed_by', 'reactions', 'timeline_url', 'performed_via_github_app', 'state_reason']
+</span><span data-line="2">First issue title: feat(api): return better error message on missing embedding
+</span></pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="more-non-runnable-examples">
+<h1>More (non runnable) examples<a class="headerlink" href="#more-non-runnable-examples" title="Link to this heading">#</a></h1>
+<p>The rest of these examples are not runnable, but just illustrative of the functionalities of <code class="docutils literal notranslate"><span class="pre">ho</span></code>.</p>
+<section id="post-requests-with-json-body">
+<h2>POST Requests with JSON Body<a class="headerlink" href="#post-requests-with-json-body" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Creating resources with POST</span>
+</span><span data-line="2"><span class="n">create_item</span> <span class="o">=</span> <span class="n">route_to_func</span><span class="p">(</span>
+</span><span data-line="3">    <span class="s2">"https://api.example.com/items"</span><span class="p">,</span>
+</span><span data-line="4">    <span class="n">method</span><span class="o">=</span><span class="s2">"post"</span><span class="p">,</span>
+</span><span data-line="5">    <span class="n">description</span><span class="o">=</span><span class="s2">"Create a new item"</span><span class="p">,</span>
+</span><span data-line="6">    <span class="n">param_types</span><span class="o">=</span><span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"string"</span><span class="p">,</span> <span class="s2">"price"</span><span class="p">:</span> <span class="s2">"number"</span><span class="p">}</span>
+</span><span data-line="7"><span class="p">)</span>
+</span><span data-line="8">
+</span><span data-line="9"><span class="n">new_item</span> <span class="o">=</span> <span class="n">create_item</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"New Product"</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mf">19.99</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="working-with-full-openapi-specifications">
+<h2>Working with Full OpenAPI Specifications<a class="headerlink" href="#working-with-full-openapi-specifications" title="Link to this heading">#</a></h2>
+<p>If you have an existing OpenAPI specification file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">ho</span><span class="w"> </span><span class="kn">import</span> <span class="n">routes_to_funcs</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Load the OpenAPI spec</span>
+</span><span data-line="5"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">'api_spec.yaml'</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="6">    <span class="n">spec</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</span><span data-line="7">
+</span><span data-line="8"><span class="c1"># Create functions for all endpoints</span>
+</span><span data-line="9"><span class="n">api_client</span> <span class="o">=</span> <span class="n">routes_to_funcs</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="s2">"https://api.example.com"</span><span class="p">)</span>
+</span><span data-line="10">
+</span><span data-line="11"><span class="c1"># Use the functions</span>
+</span><span data-line="12"><span class="n">users</span> <span class="o">=</span> <span class="n">api_client</span><span class="p">[</span><span class="s1">'get'</span><span class="p">,</span> <span class="s1">'/users'</span><span class="p">]()</span>
+</span><span data-line="13"><span class="n">user</span> <span class="o">=</span> <span class="n">api_client</span><span class="p">[</span><span class="s1">'get'</span><span class="p">,</span> <span class="s1">'/users/</span><span class="si">{id}</span><span class="s1">'</span><span class="p">](</span><span class="nb">id</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Or convert them to a namespace for even easier access:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">ho</span><span class="w"> </span><span class="kn">import</span> <span class="n">routes_to_namespace</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="c1"># Create a namespace with all API functions</span>
+</span><span data-line="4"><span class="n">api</span> <span class="o">=</span> <span class="n">routes_to_namespace</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="s2">"https://api.example.com"</span><span class="p">)</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="c1"># Access functions by their generated names</span>
+</span><span data-line="7"><span class="n">users</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_users</span><span class="p">()</span>
+</span><span data-line="8"><span class="n">user</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_users_id_</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="advanced-features">
+<h2>Advanced Features<a class="headerlink" href="#advanced-features" title="Link to this heading">#</a></h2>
+<section id="custom-response-processing">
+<h3>Custom Response Processing<a class="headerlink" href="#custom-response-processing" title="Link to this heading">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span><span class="w"> </span><span class="nf">process_xml_response</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+</span><span data-line="2">    <span class="kn">import</span><span class="w"> </span><span class="nn">xml.etree.ElementTree</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ET</span>
+</span><span data-line="3">    <span class="n">root</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</span><span data-line="4">    <span class="c1"># Process the XML</span>
+</span><span data-line="5">    <span class="k">return</span> <span class="p">{</span><span class="s2">"processed"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"data"</span><span class="p">:</span> <span class="n">root</span><span class="p">}</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="n">xml_api</span> <span class="o">=</span> <span class="n">route_to_func</span><span class="p">(</span>
+</span><span data-line="8">    <span class="s2">"https://api.example.com/xml/</span><span class="si">{resource}</span><span class="s2">"</span><span class="p">,</span>
+</span><span data-line="9">    <span class="n">egress</span><span class="o">=</span><span class="n">process_xml_response</span>
+</span><span data-line="10"><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="error-handling">
+<h3>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span><span class="w"> </span><span class="nf">custom_error_handler</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span data-line="2">    <span class="k">if</span> <span class="n">exception</span><span class="p">:</span>
+</span><span data-line="3">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Request failed: </span><span class="si">{</span><span class="n">exception</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="4">        <span class="k">return</span> <span class="p">{</span><span class="s2">"error"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exception</span><span class="p">)}</span>
+</span><span data-line="5">    
+</span><span data-line="6">    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">&gt;=</span> <span class="mi">400</span><span class="p">:</span>
+</span><span data-line="7">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"API error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="8">        <span class="k">return</span> <span class="p">{</span><span class="s2">"error"</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">}</span>
+</span><span data-line="9">    
+</span><span data-line="10">    <span class="k">return</span> <span class="n">response</span>
+</span><span data-line="11">
+</span><span data-line="12"><span class="n">api</span> <span class="o">=</span> <span class="n">route_to_func</span><span class="p">(</span>
+</span><span data-line="13">    <span class="s2">"https://api.example.com/</span><span class="si">{resource}</span><span class="s2">"</span><span class="p">,</span>
+</span><span data-line="14">    <span class="n">error_handler</span><span class="o">=</span><span class="n">custom_error_handler</span>
+</span><span data-line="15"><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="why-use-this-library">
+<h2>Why Use This Library?<a class="headerlink" href="#why-use-this-library" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p><strong>No Code Generation</strong>: Unlike traditional OpenAPI tools that generate static code, this library creates functions dynamically at runtime.</p></li>
+<li><p><strong>Simplified Interface</strong>: Turn complex HTTP API calls into simple Python function calls.</p></li>
+<li><p><strong>Type Hints and Documentation</strong>: Generated functions include proper signatures and docstrings.</p></li>
+<li><p><strong>Flexibility</strong>: Works with both simple URL templates and complete OpenAPI specifications.</p></li>
+<li><p><strong>Lightweight</strong>: No complex dependencies or build processes required.</p></li>
+</ol>
+</section>
+<section id="comparison-to-other-tools">
+<h2>Comparison to Other Tools<a class="headerlink" href="#comparison-to-other-tools" title="Link to this heading">#</a></h2>
+<p>Most OpenAPI tools like <a class="reference external" href="https://openapi-generator.tech/">OpenAPI Generator</a> generate static code in multiple languages. This approach requires a build step and often results in large codebases. Our library provides a lightweight alternative with dynamic function creation at runtime, which is perfect for Python’s dynamic nature and for rapid prototyping.</p>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pip<span class="w"> </span>install<span class="w"> </span>ho
+</span></pre></div>
+</div>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading">#</a></h2>
+<p>MIT</p>
+<p class="epythet-aggregates">This documentation as a single file: <a href="ho.md">ho.md</a> (Markdown, for agents).</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-12 18:19 UTC from <a href="https://github.com/i2mint/ho/commit/c8cae819500ff6e8ce7406b4145f39d9d349e57c">c8cae81</a> (master) · ho 0.0.11 · <a href="about-this-build.html">about this build</a></p>
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-next">
+    <a href="api.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">API reference</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright">
+  <p>
+    Made with
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+  <a href="https://github.com/i2mint/ho" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div>
+    </div>
+  </div>
+</footer>
+      <script src="_static/documentation_options.js?v=0c446633"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script src="_static/toggleprompt.js?v=d7ede5d2"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
-      <script src="_static/copybutton.js?v=f281be69"></script>
-    <script src="_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ho" href="module_docs/ho.html" /> 
-</head>
-
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-
-          
-          
-          <a href="#" class="icon icon-home">
-            ho
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/ho.html">ho</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/ho/base.html">ho.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/ho/util.html">ho.util</a></li>
-</ul>
-
-        </div>
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">ho</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to ho’s documentation!</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="welcome-to-ho-s-documentation">
-<h1>Welcome to ho’s documentation!<a class="headerlink" href="#welcome-to-ho-s-documentation" title="Link to this heading"></a></h1>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/ho.html">ho</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/ho/base.html">ho.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/ho/util.html">ho.util</a></li>
-</ul>
-</div>
-</section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
-<p>Release: 0.0.9</p>
-<p>Last change: Jul 11, 2026</p>
-</section>
-
-
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="module_docs/ho.html" class="btn btn-neutral float-right" title="ho" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p></p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
-      </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
-</body>
+      <script src="_static/copybutton.js?v=fd10adb8"></script>
+      <script src="_static/shibuya.js?v=50760d75"></script></body>
 </html>

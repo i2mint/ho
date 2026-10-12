@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="yellow" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ho.base - ho</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="ho.util" href="ho.util.html" /><link rel="prev" title="ho" href="ho.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d88b86f9" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="ho.base"/>
+    <meta name="twitter:card" content="summary"/>
+  
+<link rel="alternate" type="text/markdown" href="ho.base.html.md">
+<link rel="describedby" href="../llms.txt" type="text/markdown">
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>ho</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/i2mint/ho" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ho.html">ho</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ho.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ho.util.html">ho.util</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ai-agents.html">For AI agents</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#ho.base.default_error_handler"><code class="docutils literal notranslate"><span class="pre">default_error_handler()</span></code></a></li>
+<li><a class="reference internal" href="#ho.base.default_response_processor"><code class="docutils literal notranslate"><span class="pre">default_response_processor()</span></code></a></li>
+<li><a class="reference internal" href="#ho.base.default_route_maker"><code class="docutils literal notranslate"><span class="pre">default_route_maker()</span></code></a></li>
+<li><a class="reference internal" href="#ho.base.minimal_openapi_template"><code class="docutils literal notranslate"><span class="pre">minimal_openapi_template()</span></code></a></li>
+<li><a class="reference internal" href="#ho.base.route_to_func"><code class="docutils literal notranslate"><span class="pre">route_to_func()</span></code></a></li>
+<li><a class="reference internal" href="#ho.base.routes_to_funcs"><code class="docutils literal notranslate"><span class="pre">routes_to_funcs()</span></code></a></li>
+<li><a class="reference internal" href="#ho.base.update_spec"><code class="docutils literal notranslate"><span class="pre">update_spec()</span></code></a></li>
+<li><a class="reference internal" href="#ho.base.url_template_to_func"><code class="docutils literal notranslate"><span class="pre">url_template_to_func()</span></code></a></li>
+<li><a class="reference internal" href="#ho.base.url_template_to_openapi"><code class="docutils literal notranslate"><span class="pre">url_template_to_openapi()</span></code></a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">ho</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../api.html"><span itemprop="name">API reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="ho.html"><span itemprop="name">ho</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">ho.base</strong>
+        <meta itemprop="position" content="4" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue dark-code" role="main">
+          <section id="module-ho.base">
+<span id="ho-base"></span><h1>ho.base<a class="headerlink" href="#module-ho.base" title="Link to this heading">#</a></h1>
+<p>HO base objects</p>
+<p class="rubric">Functions</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ho.base.default_error_handler" title="ho.base.default_error_handler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_error_handler</span></code></a>(response[, exception])</p></td>
+<td><p>Default error handling: raise for status and return exception info if any</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ho.base.default_response_processor" title="ho.base.default_response_processor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_response_processor</span></code></a>(response)</p></td>
+<td><p>Try to return response as JSON, fallback to text and then content</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ho.base.default_route_maker" title="ho.base.default_route_maker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_route_maker</span></code></a>(route_spec[, method, ...])</p></td>
+<td><p>Convert various input formats to a ju.oas.Route object, optionally modifying the spec.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ho.base.minimal_openapi_template" title="ho.base.minimal_openapi_template"><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimal_openapi_template</span></code></a>(api_path[, method, ...])</p></td>
+<td><p>Create a minimal OpenAPI template with just the essential elements.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ho.base.route_to_func" title="ho.base.route_to_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">route_to_func</span></code></a>(route[, base_url, ...])</p></td>
+<td><p>Generate a Python function from an OpenAPI route specification.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ho.base.routes_to_funcs" title="ho.base.routes_to_funcs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">routes_to_funcs</span></code></a>(spec_or_routes, base_url, *)</p></td>
+<td><p>Convert all routes in an OpenAPI specification to Python functions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">routes_to_namespace</span></code>(spec_or_routes, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ho.base.update_spec" title="ho.base.update_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_spec</span></code></a>(spec, path, method[, ...])</p></td>
+<td><p>Update an OpenAPI spec with provided parameters for a specific path and method.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ho.base.url_template_to_func" title="ho.base.url_template_to_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">url_template_to_func</span></code></a>(url_template, *[, ...])</p></td>
+<td><p>Convert a URL template directly to a Python function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ho.base.url_template_to_openapi" title="ho.base.url_template_to_openapi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">url_template_to_openapi</span></code></a>(url_template, *[, ...])</p></td>
+<td><p>Convert a URL template with placeholders to an OpenAPI specification.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="ho.base.default_error_handler">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">default_error_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exception</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ho/base.html#default_error_handler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.base.default_error_handler" title="Link to this definition">#</a></dt>
+<dd><p>Default error handling: raise for status and return exception info if any</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ho.base.default_response_processor">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">default_response_processor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ho/base.html#default_response_processor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.base.default_response_processor" title="Link to this definition">#</a></dt>
+<dd><p>Try to return response as JSON, fallback to text and then content</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ho.base.default_route_maker">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">default_route_maker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'get'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_descriptions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">openapi_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ho/base.html#default_route_maker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.base.default_route_maker" title="Link to this definition">#</a></dt>
+<dd><p>Convert various input formats to a ju.oas.Route object, optionally modifying the spec.</p>
+<p class="rubric">Parameters</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>ju.oas.Route: returned unchanged</p></li>
+<li><p>str: treated as a URL template and converted to a Route</p></li>
+<li><p>dict: treated as an OpenAPI spec and converted to a Route</p></li>
+<li><p>tuple: (method, endpoint) or (method, endpoint, spec)</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>method<span class="classifier">str, optional</span></dt><dd><p>HTTP method to use when route_spec is a string (default: “get”)</p>
+</dd>
+<dt>description<span class="classifier">str, optional</span></dt><dd><p>Description to override or set for the endpoint</p>
+</dd>
+<dt>param_types<span class="classifier">dict, optional</span></dt><dd><p>Dictionary mapping parameter names to their types</p>
+</dd>
+<dt>param_descriptions<span class="classifier">dict, optional</span></dt><dd><p>Dictionary mapping parameter names to their descriptions</p>
+</dd>
+<dt>param_defaults<span class="classifier">dict, optional</span></dt><dd><p>Dictionary mapping parameter names to their default values</p>
+</dd>
+<dt>response_schema<span class="classifier">dict, optional</span></dt><dd><p>Schema for the response</p>
+</dd>
+<dt>openapi_template<span class="classifier">dict, optional</span></dt><dd><p>Custom OpenAPI template for string inputs</p>
+</dd>
+</dl>
+<p class="rubric">Returns</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ho.base.minimal_openapi_template">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">minimal_openapi_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'get'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ho/base.html#minimal_openapi_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.base.minimal_openapi_template" title="Link to this definition">#</a></dt>
+<dd><p>Create a minimal OpenAPI template with just the essential elements.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ho.base.route_to_func">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">route_to_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">route_maker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'get'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_handler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_headers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_descriptions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">openapi_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ho/base.html#route_to_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.base.route_to_func" title="Link to this definition">#</a></dt>
+<dd><p>Generate a Python function from an OpenAPI route specification.</p>
+<p>The generated function will make HTTP requests to the web service
+according to the route’s method and parameters.</p>
+<p class="rubric">Parameters</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>ju.oas.Route: An OpenAPI route specification</p></li>
+<li><p>str: A URL template with placeholders (e.g., “<a class="reference external" href="https://api.example.com/items">https://api.example.com/items</a>/{id}”)</p></li>
+<li><p>dict: An OpenAPI specification dictionary</p></li>
+<li><p>tuple: (method, endpoint) or (method, endpoint, spec)</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>base_url<span class="classifier">str, optional</span></dt><dd><p>The base URL of the web service. If None, attempts to extract from the OpenAPI spec’s
+servers array. At least one of base_url or a server URL in the spec must be provided.</p>
+</dd>
+<dt>route_maker<span class="classifier">callable, optional</span></dt><dd><p>A function to convert the route parameter to a ju.oas.Route object.
+If None, default_route_maker is used.</p>
+</dd>
+<dt>method<span class="classifier">str, optional</span></dt><dd><p>HTTP method to use when route is a string template (default: “get”)</p>
+</dd>
+<dt>session<span class="classifier">requests.Session, optional</span></dt><dd><p>A session object to use for requests. If None, a new session will be created for each request.</p>
+</dd>
+<dt>error_handler<span class="classifier">callable, optional</span></dt><dd><p>A function to handle request errors. Should accept (response, exception) and return a value or raise.</p>
+</dd>
+<dt>timeout<span class="classifier">int, optional</span></dt><dd><p>Request timeout in seconds.</p>
+</dd>
+<dt>egress<span class="classifier">callable, optional</span></dt><dd><p>A function to process the response before returning. If None, JSON will be attempted first,
+then text, then binary content.</p>
+</dd>
+<dt>custom_headers<span class="classifier">dict, optional</span></dt><dd><p>Custom headers to include in all requests.</p>
+</dd>
+<dt>name<span class="classifier">str, optional</span></dt><dd><p>The name of the generated function. If None, a default name will be generated based on the route.</p>
+</dd>
+</dl>
+<p class="rubric">Returns</p>
+<p class="rubric">Example</p>
+<hr class="docutils" />
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using a Route object</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">ju.oas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Routes</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">routes</span> <span class="o">=</span> <span class="n">Routes</span><span class="p">(</span><span class="n">openapi_spec</span><span class="p">)</span>
+</span><span data-line="4"><span class="gp">&gt;&gt;&gt; </span><span class="n">get_items</span> <span class="o">=</span> <span class="n">route_to_func</span><span class="p">(</span><span class="n">routes</span><span class="p">[</span><span class="s1">'get'</span><span class="p">,</span> <span class="s1">'/items'</span><span class="p">],</span> <span class="s1">'https://api.example.com'</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using a URL template</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="n">get_item</span> <span class="o">=</span> <span class="n">route_to_func</span><span class="p">(</span><span class="s2">"https://api.example.com/items/</span><span class="si">{item_id}</span><span class="s2">"</span><span class="p">,</span> <span class="s1">'https://api.example.com'</span><span class="p">)</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">item</span> <span class="o">=</span> <span class="n">get_item</span><span class="p">(</span><span class="n">item_id</span><span class="o">=</span><span class="s2">"abc123"</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using an OpenAPI spec dictionary</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="n">spec</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"openapi"</span><span class="p">:</span> <span class="s2">"3.0.3"</span><span class="p">,</span> <span class="s2">"paths"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"/items"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"get"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"parameters"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]}}}}</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">get_items</span> <span class="o">=</span> <span class="n">route_to_func</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="s1">'https://api.example.com'</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ho.base.routes_to_funcs">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">routes_to_funcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec_or_routes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_url</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_as_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">route_to_func_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ho/base.html#routes_to_funcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.base.routes_to_funcs" title="Link to this definition">#</a></dt>
+<dd><p>Convert all routes in an OpenAPI specification to Python functions.</p>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt>base_url<span class="classifier">str</span></dt><dd><p>The base URL of the web service.</p>
+</dd>
+<dt>name_as_key<span class="classifier">bool, optional</span></dt><dd><p>If True, use the function name as the key in the returned dictionary.
+If False, use a tuple of (method, endpoint) as the key.</p>
+</dd>
+<dt>**route_to_func_kwargs :</dt><dd><p>Additional keyword arguments to pass to route_to_func.</p>
+</dd>
+</dl>
+<p class="rubric">Returns</p>
+<p class="rubric">Example</p>
+<hr class="docutils" />
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">ju.oas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Routes</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="n">routes</span> <span class="o">=</span> <span class="n">Routes</span><span class="p">(</span><span class="n">openapi_spec</span><span class="p">)</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">api_functions</span> <span class="o">=</span> <span class="n">routes_to_funcs</span><span class="p">(</span><span class="n">routes</span><span class="p">,</span> <span class="s1">'https://api.example.com'</span><span class="p">)</span>
+</span><span data-line="4"><span class="gp">&gt;&gt;&gt; </span><span class="n">items</span> <span class="o">=</span> <span class="n">api_functions</span><span class="p">[</span><span class="s1">'get'</span><span class="p">,</span> <span class="s1">'/items'</span><span class="p">](</span><span class="nb">type</span><span class="o">=</span><span class="s1">'electronics'</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ho.base.update_spec">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">update_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_descriptions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ho/base.html#update_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.base.update_spec" title="Link to this definition">#</a></dt>
+<dd><p>Update an OpenAPI spec with provided parameters for a specific path and method.</p>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt>path<span class="classifier">str</span></dt><dd><p>The endpoint path.</p>
+</dd>
+<dt>method<span class="classifier">str</span></dt><dd><p>The HTTP method.</p>
+</dd>
+<dt>description<span class="classifier">str, optional</span></dt><dd><p>New description to set.</p>
+</dd>
+<dt>param_types<span class="classifier">dict, optional</span></dt><dd><p>Parameter types to update.</p>
+</dd>
+<dt>param_descriptions<span class="classifier">dict, optional</span></dt><dd><p>Parameter descriptions to update.</p>
+</dd>
+<dt>param_defaults<span class="classifier">dict, optional</span></dt><dd><p>Parameter defaults to update.</p>
+</dd>
+<dt>response_schema<span class="classifier">dict, optional</span></dt><dd><p>Response schema to update.</p>
+</dd>
+</dl>
+<p class="rubric">Returns</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ho.base.url_template_to_func">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">url_template_to_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url_template</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'get'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_descriptions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">openapi_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_handler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_headers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ho/base.html#url_template_to_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.base.url_template_to_func" title="Link to this definition">#</a></dt>
+<dd><p>Convert a URL template directly to a Python function.</p>
+<p class="rubric">Parameters</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Simple: {param_name}</p></li>
+<li><p>With default: {param_name:default_value}
+Examples:</p></li>
+<li><p>“<a class="reference external" href="https://example.com/mall">https://example.com/mall</a>/{store}/{item_id:1}”</p></li>
+<li><p>“<a class="reference external" href="https://www.google.com/search">https://www.google.com/search</a>?q={search_term}”</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>method<span class="classifier">str, optional</span></dt><dd><p>HTTP method for the endpoint (default: “get”)</p>
+</dd>
+<dt>description<span class="classifier">str, optional</span></dt><dd><p>Description of the endpoint</p>
+</dd>
+<dt>param_types<span class="classifier">dict, optional</span></dt><dd><p>Dictionary mapping parameter names to their types (string, integer, etc.)</p>
+</dd>
+<dt>param_descriptions<span class="classifier">dict, optional</span></dt><dd><p>Dictionary mapping parameter names to their descriptions</p>
+</dd>
+<dt>param_defaults<span class="classifier">dict, optional</span></dt><dd><p>Dictionary mapping parameter names to their default values</p>
+</dd>
+<dt>response_schema<span class="classifier">dict, optional</span></dt><dd><p>Schema for the response</p>
+</dd>
+<dt>openapi_template<span class="classifier">dict, optional</span></dt><dd><p>Custom OpenAPI template instead of using the minimal default</p>
+</dd>
+<dt>session<span class="classifier">requests.Session, optional</span></dt><dd><p>A session object to use for requests</p>
+</dd>
+<dt>error_handler<span class="classifier">callable, optional</span></dt><dd><p>A function to handle request errors</p>
+</dd>
+<dt>timeout<span class="classifier">int, optional</span></dt><dd><p>Request timeout in seconds</p>
+</dd>
+<dt>egress<span class="classifier">callable, optional</span></dt><dd><p>A function to process the response before returning</p>
+</dd>
+<dt>custom_headers<span class="classifier">dict, optional</span></dt><dd><p>Custom headers to include in all requests</p>
+</dd>
+</dl>
+<p class="rubric">Returns</p>
+<p class="rubric">Example</p>
+<hr class="docutils" />
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">search_google</span> <span class="o">=</span> <span class="n">url_template_to_func</span><span class="p">(</span>
+</span><span data-line="2"><span class="gp">... </span>    <span class="s2">"https://www.google.com/search?q=</span><span class="si">{search_term}</span><span class="s2">"</span><span class="p">,</span>
+</span><span data-line="3"><span class="gp">... </span>    <span class="n">description</span><span class="o">=</span><span class="s2">"Search Google"</span><span class="p">,</span>
+</span><span data-line="4"><span class="gp">... </span>    <span class="n">egress</span><span class="o">=</span><span class="k">lambda</span> <span class="n">response</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+</span><span data-line="5"><span class="gp">... </span><span class="p">)</span>
+</span><span data-line="6"><span class="gp">&gt;&gt;&gt; </span><span class="n">results</span> <span class="o">=</span> <span class="n">search_google</span><span class="p">(</span><span class="n">search_term</span><span class="o">=</span><span class="s2">"Python"</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example using REST Countries API with path and query parameters</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="n">get_country</span> <span class="o">=</span> <span class="n">url_template_to_func</span><span class="p">(</span>
+</span><span data-line="3"><span class="gp">... </span>    <span class="s2">"https://restcountries.com/v3.1/name/</span><span class="si">{country_name}</span><span class="s2">?fullText={full_text:false}&amp;fields={fields:name,capital,population}"</span><span class="p">,</span>
+</span><span data-line="4"><span class="gp">... </span>    <span class="n">description</span><span class="o">=</span><span class="s2">"Get country information by name"</span><span class="p">,</span>
+</span><span data-line="5"><span class="gp">... </span>    <span class="n">param_types</span><span class="o">=</span><span class="p">{</span><span class="s2">"country_name"</span><span class="p">:</span> <span class="s2">"string"</span><span class="p">,</span> <span class="s2">"full_text"</span><span class="p">:</span> <span class="s2">"boolean"</span><span class="p">,</span> <span class="s2">"fields"</span><span class="p">:</span> <span class="s2">"string"</span><span class="p">},</span>
+</span><span data-line="6"><span class="gp">... </span>    <span class="n">param_descriptions</span><span class="o">=</span><span class="p">{</span>
+</span><span data-line="7"><span class="gp">... </span>        <span class="s2">"country_name"</span><span class="p">:</span> <span class="s2">"Name of the country to search for"</span><span class="p">,</span>
+</span><span data-line="8"><span class="gp">... </span>        <span class="s2">"full_text"</span><span class="p">:</span> <span class="s2">"Whether to match the full text of the name (true) or partial match (false)"</span><span class="p">,</span>
+</span><span data-line="9"><span class="gp">... </span>        <span class="s2">"fields"</span><span class="p">:</span> <span class="s2">"Comma-separated list of fields to include in the response"</span>
+</span><span data-line="10"><span class="gp">... </span>    <span class="p">}</span>
+</span><span data-line="11"><span class="gp">... </span><span class="p">)</span>
+</span><span data-line="12"><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+</span><span data-line="13"><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">get_country</span><span class="p">))</span>  <span class="c1"># View the generated function signature</span>
+</span><span data-line="14"><span class="go">(country_name: str, full_text: bool = 'false', fields: str = 'name,capital,population')</span>
+</span></pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example using TheMealDB API with multiple query parameters</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="n">search_meals</span> <span class="o">=</span> <span class="n">url_template_to_func</span><span class="p">(</span>
+</span><span data-line="3"><span class="gp">... </span>    <span class="s2">"https://www.themealdb.com/api/json/v1/1/filter.php?c={category:Dessert}&amp;a=</span><span class="si">{area:}</span><span class="s2">"</span><span class="p">,</span>
+</span><span data-line="4"><span class="gp">... </span>    <span class="n">description</span><span class="o">=</span><span class="s2">"Search for meals by category and area"</span><span class="p">,</span>
+</span><span data-line="5"><span class="gp">... </span>    <span class="n">param_types</span><span class="o">=</span><span class="p">{</span><span class="s2">"category"</span><span class="p">:</span> <span class="s2">"string"</span><span class="p">,</span> <span class="s2">"area"</span><span class="p">:</span> <span class="s2">"string"</span><span class="p">},</span>
+</span><span data-line="6"><span class="gp">... </span>    <span class="n">param_descriptions</span><span class="o">=</span><span class="p">{</span>
+</span><span data-line="7"><span class="gp">... </span>        <span class="s2">"category"</span><span class="p">:</span> <span class="s2">"The category of meals to search for (e.g., Seafood, Dessert)"</span><span class="p">,</span>
+</span><span data-line="8"><span class="gp">... </span>        <span class="s2">"area"</span><span class="p">:</span> <span class="s2">"The area/country of origin (optional, e.g., Italian, American)"</span>
+</span><span data-line="9"><span class="gp">... </span>    <span class="p">}</span>
+</span><span data-line="10"><span class="gp">... </span><span class="p">)</span>
+</span><span data-line="11"><span class="gp">&gt;&gt;&gt; </span><span class="c1"># search_meals can be called with either or both parameters:</span>
+</span><span data-line="12"><span class="gp">&gt;&gt;&gt; </span><span class="c1"># italian_desserts = search_meals(area="Italian")  # Uses default category="Dessert"</span>
+</span><span data-line="13"><span class="gp">&gt;&gt;&gt; </span><span class="c1"># seafood_meals = search_meals(category="Seafood")  # No area specified</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ho.base.url_template_to_openapi">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">url_template_to_openapi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url_template</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'get'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_descriptions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">openapi_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ho/base.html#url_template_to_openapi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.base.url_template_to_openapi" title="Link to this definition">#</a></dt>
+<dd><p>Convert a URL template with placeholders to an OpenAPI specification.</p>
+<p class="rubric">Parameters</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Simple: {param_name}</p></li>
+<li><p>With default: {param_name:default_value}</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>method<span class="classifier">str, optional</span></dt><dd><p>HTTP method for the endpoint (default: “get”)</p>
+</dd>
+<dt>description<span class="classifier">str, optional</span></dt><dd><p>Description of the endpoint</p>
+</dd>
+<dt>param_types<span class="classifier">dict, optional</span></dt><dd><p>Dictionary mapping parameter names to their types</p>
+</dd>
+<dt>param_descriptions<span class="classifier">dict, optional</span></dt><dd><p>Dictionary mapping parameter names to their descriptions</p>
+</dd>
+<dt>param_defaults<span class="classifier">dict, optional</span></dt><dd><p>Dictionary mapping parameter names to their default values</p>
+</dd>
+<dt>response_schema<span class="classifier">dict, optional</span></dt><dd><p>Schema for the response</p>
+</dd>
+<dt>openapi_template<span class="classifier">dict, optional</span></dt><dd><p>Custom OpenAPI template to use instead of the default minimal one</p>
+</dd>
+</dl>
+<p class="rubric">Returns</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="ho.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">ho</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="ho.util.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">ho.util</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright">
+  <p>
+    Made with
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+  <a href="https://github.com/i2mint/ho" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=0c446633"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=fd10adb8"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+</html>

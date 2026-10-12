@@ -1,0 +1,14 @@
+# ho
+
+> Http Objects - Tools to make python interfaces to http services
+
+
+## Pages in this subsection
+
+- [ho](ho.html.md): Tools to make python interface objects for http services
+- [ho.base](ho.base.html.md): HO base objects
+- [ho.util](ho.util.html.md): Utils for HO
+
+## Optional
+
+- [Top-level llms.txt](../llms.txt): Complete documentation index.

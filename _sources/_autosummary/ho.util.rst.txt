@@ -1,0 +1,18 @@
+ho.util
+=======
+
+.. automodule:: ho.util
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      extract_placeholders
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SimpleMappingNamespace
+   

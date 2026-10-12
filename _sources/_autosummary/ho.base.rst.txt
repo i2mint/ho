@@ -1,0 +1,21 @@
+ho.base
+=======
+
+.. automodule:: ho.base
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      default_error_handler
+      default_response_processor
+      default_route_maker
+      minimal_openapi_template
+      route_to_func
+      routes_to_funcs
+      routes_to_namespace
+      update_spec
+      url_template_to_func
+      url_template_to_openapi
+   
