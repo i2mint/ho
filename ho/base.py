@@ -1,5 +1,7 @@
 """HO base objects"""
 
+import json
+import os
 import re
 from typing import Optional
 from collections.abc import Callable
@@ -13,7 +15,7 @@ from ju.json_schema import (
     json_schema_to_signature,
     schema_param_names,
 )
-from ju.oas import BODY_IN, Route, Routes
+from ju.oas import BODY_IN, PARAM_IN, Route, Routes
 
 from ho.util import SimpleMappingNamespace
 
@@ -319,15 +321,43 @@ def _path_value(value) -> str:
     return quote(_simple_style(value), safe="")
 
 
-def _multipart_field(value):
-    """A multipart field for ``requests``: bytes and files as they are, the rest as text.
+def _form_value(value):
+    """A form field value for ``requests``: booleans as ``true``/``false``, objects
+    as JSON, lists as repeated values.
 
-    >>> _multipart_field(True), _multipart_field(b'raw')
-    ((None, 'true'), (None, b'raw'))
+    >>> _form_value(True), _form_value({'k': 1}), _form_value([False, 'a'])
+    ('true', '{"k": 1}', ['false', 'a'])
     """
-    if isinstance(value, bytes) or hasattr(value, "read"):
-        return (None, value)
-    return (None, _simple_style(value))
+    if isinstance(value, dict):
+        return json.dumps(value)
+    if isinstance(value, (list, tuple)):
+        return [_form_value(v) for v in value]
+    return _query_value(value)
+
+
+def _multipart_fields(body: dict) -> list:
+    """The ``files=`` list ``requests`` builds a multipart body from: bytes and
+    files as file parts (with a filename, as servers need to see an upload), lists
+    as one part per item, the rest as text parts.
+
+    >>> _multipart_fields({'n': 3, 'tags': ['a', True], 'raw': b'x', 'o': {'k': 1}})
+    [('n', (None, '3')), ('tags', (None, 'a')), ('tags', (None, 'true')), ('raw', ('raw', b'x')), ('o', (None, '{"k": 1}'))]
+    """
+
+    def part(key, value):
+        if isinstance(value, bytes):
+            return (key, (key, value))
+        if hasattr(value, "read"):
+            filename = os.path.basename(str(getattr(value, "name", None) or key))
+            return (key, (filename, value))
+        text = json.dumps(value) if isinstance(value, dict) else _simple_style(value)
+        return (key, (None, text))
+
+    return [
+        part(key, item)
+        for key, value in body.items()
+        for item in (value if isinstance(value, (list, tuple)) else [value])
+    ]
 
 
 def _without_ignored_headers(params_schema: dict, param_places: dict) -> dict:
@@ -500,9 +530,9 @@ def route_to_func(
         original_names.items(), params_schema["properties"].values()
     ):
         where = prop.get(OAS_IN_KEY) or param_places.get(spec_name)
-        if where is None and f"{{{spec_name}}}" in route.endpoint:
+        if where in (None, PARAM_IN) and f"{{{spec_name}}}" in route.endpoint:
             where = "path"  # a parameter that does not say where, the URL does
-        if where == BODY_IN or (where is None and has_body):
+        if where == BODY_IN or (where in (None, PARAM_IN) and has_body):
             where = "body"
         locations[pyname] = (spec_name, where)
 
@@ -524,6 +554,10 @@ def route_to_func(
             elif where == "body":
                 split["body"][name] = value
         return split
+
+    # (a Route-like object from a custom route_maker may not have the attribute)
+    body_type = (getattr(route, "body_content_type", None) or "").split(";")[0]
+    body_type = body_type.strip().lower()
 
     @sig
     def func(*args, **kwargs):
@@ -555,7 +589,6 @@ def route_to_func(
                 )
 
         # Set up headers
-        body_type = (route.body_content_type or "").split(";")[0].strip().lower()
         sent_as_form = body_type in (_FORM_MEDIA_TYPE, _MULTIPART_MEDIA_TYPE)
         # A form body's Content-Type is for ``requests`` to set (multipart needs
         # its boundary); everything else is sent as JSON.
@@ -581,12 +614,10 @@ def route_to_func(
             )
             if body_type == _FORM_MEDIA_TYPE:
                 method_kwargs["data"] = {
-                    k: _query_value(v) for k, v in body_params.items()
+                    k: _form_value(v) for k, v in body_params.items()
                 }
             elif body_type == _MULTIPART_MEDIA_TYPE:
-                method_kwargs["files"] = {
-                    k: _multipart_field(v) for k, v in body_params.items()
-                }
+                method_kwargs["files"] = _multipart_fields(body_params)
             elif http_method != "get" or body_params:
                 # (a GET without body arguments has no body to send)
                 method_kwargs["json"] = body_params
@@ -632,8 +663,11 @@ def route_to_func(
         shown = (
             f"{pyname} (sent as {spec_name!r})" if pyname != spec_name else spec_name
         )
+        where = locations[pyname][1]
         description = described.get(
-            (spec_name, locations[pyname][1]), prop.get("description", "")
+            (spec_name, where),
+            # (a parameter that did not say where is keyed by None)
+            described.get((spec_name, None), prop.get("description", "")),
         )
         params_description += f"\n    {shown}: {description}"
 
