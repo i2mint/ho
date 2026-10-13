@@ -19,6 +19,11 @@ from ju.oas import BODY_IN, PARAM_IN, Route, Routes
 
 from ho.util import SimpleMappingNamespace
 
+#: A parameter schema's ``x-python-name`` is the name of the Python argument to
+#: send under the parameter's own (spec) name, e.g. the placeholder ``search_term``
+#: of ``?q={search_term}``.
+PYTHON_NAME_KEY = "x-python-name"
+
 
 def update_spec(
     spec,
@@ -382,6 +387,35 @@ def _without_ignored_headers(params_schema: dict, param_places: dict) -> dict:
     }
 
 
+def _with_python_names(params_schema: dict) -> dict:
+    """The parameters schema with each ``x-python-name`` property keyed by that name,
+    recording its old key (the name the spec sends it under) as ``x-oas-name``.
+
+    >>> schema = {'properties': {'q': {'x-python-name': 'term'}, 'n': {}},
+    ...           'required': ['q']}
+    >>> _with_python_names(schema)
+    {'properties': {'term': {'x-oas-name': 'q'}, 'n': {}}, 'required': ['term']}
+    """
+    renames = {}
+    for key, prop in params_schema["properties"].items():
+        name = prop.get(PYTHON_NAME_KEY)
+        if name and name != key and name not in params_schema["properties"]:
+            renames[key] = name
+    if not renames:
+        return params_schema
+    properties = {}
+    for key, prop in params_schema["properties"].items():
+        if key in renames:
+            prop = {k: v for k, v in prop.items() if k != PYTHON_NAME_KEY}
+            prop.setdefault(OAS_NAME_KEY, key)
+        properties[renames.get(key, key)] = prop
+    return {
+        **params_schema,
+        "properties": properties,
+        "required": [renames.get(k, k) for k in params_schema.get("required", [])],
+    }
+
+
 def route_to_func(
     route,
     base_url: str | None = None,
@@ -500,6 +534,7 @@ def route_to_func(
     }
     # The route's parameters, minus the headers OpenAPI says to ignore
     params_schema = _without_ignored_headers(route.params, param_places)
+    params_schema = _with_python_names(params_schema)
 
     # Get the function signature from the route parameters
     sig = json_schema_to_signature(params_schema)
@@ -853,39 +888,33 @@ def url_template_to_openapi(
         else:
             path_params.append(param_match)
 
-    # Extract query parameters from the URL template
+    # Extract query parameters from the URL template. Each is a (name, key) pair:
+    # the placeholder's name (the Python argument) and the key the service expects
+    # in the query string (the OpenAPI parameter's name; i2mint/ho#10).
     query_string = parsed_url.query
     query_params = []
 
-    if query_string:
-        # Extract parameters from the query string
-        template_query_params = parse_qs(query_string)
+    def _add_query_param(content, key):
+        name, sep, default_value = content.partition(":")
+        if sep:
+            param_defaults[name] = default_value
+        # (a key used twice keeps the placeholder's name for the later ones, as
+        # one OpenAPI query parameter cannot be two arguments)
+        if key is None or key in (k for _, k in query_params):
+            key = name
+        query_params.append((name, key))
 
-        # Process each query parameter
-        for param_name, values in template_query_params.items():
-            # Check if this is a template parameter
-            param_match = re.search(r"\{([^{}]+)\}", param_name)
+    if query_string:
+        for key, values in parse_qs(query_string).items():
+            param_match = re.search(r"\{([^{}]+)\}", key)
             if param_match:
-                # This is a template parameter in the query parameter name
-                param_content = param_match.group(1)
-                if ":" in param_content:
-                    param_name, default_value = param_content.split(":", 1)
-                    param_defaults[param_name] = default_value
-                else:
-                    param_name = param_content
-                query_params.append(param_name)
+                # A template parameter in the query parameter name
+                _add_query_param(param_match.group(1), None)
             else:
-                # Check if the value contains a template
                 for value in values:
                     param_match = re.search(r"\{([^{}]+)\}", value)
                     if param_match:
-                        param_content = param_match.group(1)
-                        if ":" in param_content:
-                            param_name, default_value = param_content.split(":", 1)
-                            param_defaults[param_name] = default_value
-                        else:
-                            param_name = param_content
-                        query_params.append(param_name)
+                        _add_query_param(param_match.group(1), key)
 
     # Create OpenAPI spec from template or default
     if openapi_template is None:
@@ -934,20 +963,23 @@ def url_template_to_openapi(
 
         endpoint_spec["parameters"].append(param_spec)
 
-    # Add query parameters
-    for param in query_params:
-        param_spec = {
-            "name": param,
-            "in": "query",
-            "required": param not in param_defaults,
-            "schema": {"type": param_types.get(param, "string")},
-            "description": param_descriptions.get(param, f"Parameter {param}"),
-        }
-
+    # Add query parameters, named after the template's key; the placeholder's name
+    # (the Python argument) rides along as ``x-python-name`` (see `route_to_func`)
+    for param, key in query_params:
+        schema = {"type": param_types.get(param, "string")}
         if param in param_defaults:
-            param_spec["schema"]["default"] = param_defaults[param]
-
-        endpoint_spec["parameters"].append(param_spec)
+            schema["default"] = param_defaults[param]
+        if key != param:
+            schema[PYTHON_NAME_KEY] = param
+        endpoint_spec["parameters"].append(
+            {
+                "name": key,
+                "in": "query",
+                "required": param not in param_defaults,
+                "schema": schema,
+                "description": param_descriptions.get(param, f"Parameter {param}"),
+            }
+        )
 
     # Add response schema if provided
     if response_schema:
@@ -1038,6 +1070,8 @@ def url_template_to_func(
     '<html>'
     >>> sent[0]["url"]
     'https://www.google.com/search'
+    >>> sent[0]["params"]  # sent under the template's key, not the argument's name
+    {'q': 'Python'}
 
     >>> # Example using REST Countries API with path and query parameters
     >>> get_country = url_template_to_func(
