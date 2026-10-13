@@ -1,38 +1,38 @@
 {
   "schema_version": 1,
-  "built_at": "2026-10-12T18:19:58Z",
+  "built_at": "2026-10-13T11:34:40Z",
   "package": {
     "name": "ho",
-    "version": "0.0.11",
+    "version": "0.0.12",
     "display_name": "ho",
     "source": "setup.cfg"
   },
   "git": {
     "available": true,
-    "commit": "c8cae819500ff6e8ce7406b4145f39d9d349e57c",
-    "short_commit": "c8cae81",
+    "commit": "11a0a6512939dddff2ccab687a7818fc7f1b1a9e",
+    "short_commit": "11a0a65",
     "branch": "master",
     "tags": [
-      "0.0.11"
+      "0.0.12"
     ],
     "dirty": false,
     "remote_url": "https://github.com/i2mint/ho",
-    "commit_url": "https://github.com/i2mint/ho/commit/c8cae819500ff6e8ce7406b4145f39d9d349e57c",
+    "commit_url": "https://github.com/i2mint/ho/commit/11a0a6512939dddff2ccab687a7818fc7f1b1a9e",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "i2mint/ho",
-    "sha": "68ca2f6011647bf8bde7ad1f0debd0f42cc35bb8",
+    "sha": "fa726e885201abfa92c315cf1e1036da5b5d088a",
     "sha_in_history": true,
     "ref": "refs/heads/master",
     "ref_name": "master",
-    "run_id": "38289956674",
-    "run_url": "https://github.com/i2mint/ho/actions/runs/38289956674",
+    "run_id": "38390994787",
+    "run_url": "https://github.com/i2mint/ho/actions/runs/38390994787",
     "server_url": "https://github.com"
   },
   "tools": {
-    "epythet": "0.2.12",
+    "epythet": "0.2.15",
     "sphinx": "9.1.0",
     "docutils": "0.22.4",
     "python": "3.12.15"
@@ -63,13 +63,15 @@
   "pypi": {
     "checked": true,
     "latest": "0.0.11",
-    "relation": "same",
+    "relation": "ahead",
     "error": null
   },
-  "reproduce": "git clone https://github.com/i2mint/ho && cd ho\ngit checkout c8cae819500ff6e8ce7406b4145f39d9d349e57c\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/i2mint/ho && cd ho\ngit checkout 11a0a6512939dddff2ccab687a7818fc7f1b1a9e\npip install \"epythet==0.2.15\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
-    "aligned": true,
-    "notes": []
+    "aligned": false,
+    "notes": [
+      "The documented version (0.0.12) is ahead of the latest release on PyPI (0.0.11): these docs describe unreleased code."
+    ]
   }
 }

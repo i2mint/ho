@@ -2,18 +2,20 @@
 
 # About this build
 
-This documentation was built on **2026-10-12 18:19 UTC** from commit <a href="https://github.com/i2mint/ho/commit/c8cae819500ff6e8ce7406b4145f39d9d349e57c"><code>c8cae81</code></a> on branch <code>master</code>, for **ho 0.0.11** (from <code>setup.cfg</code>).
+This documentation was built on **2026-10-13 11:34 UTC** from commit <a href="https://github.com/i2mint/ho/commit/11a0a6512939dddff2ccab687a7818fc7f1b1a9e"><code>11a0a65</code></a> on branch <code>master</code>, for **ho 0.0.12** (from <code>setup.cfg</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.0.12) is ahead of the latest release on PyPI (0.0.11): these docs describe unreleased code.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/ho/commit/c8cae819500ff6e8ce7406b4145f39d9d349e57c"><code>c8cae819500ff6e8ce7406b4145f39d9d349e57c</code></a> |
+| Commit              | <a href="https://github.com/i2mint/ho/commit/11a0a6512939dddff2ccab687a7818fc7f1b1a9e"><code>11a0a6512939dddff2ccab687a7818fc7f1b1a9e</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
-| Tags at this commit | <code>0.0.11</code>                                                                                                                              |
+| Tags at this commit | <code>0.0.12</code>                                                                                                                              |
 | Working tree        | clean                                                                                                                                            |
 | Remote              | <code>https://github.com/i2mint/ho</code>                                                                                                        |
 
@@ -22,15 +24,15 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/ho</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/ho/actions/runs/38289956674">38289956674</a>            |
+| Run          | <a href="https://github.com/i2mint/ho/actions/runs/38390994787">38390994787</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>68ca2f6011647bf8bde7ad1f0debd0f42cc35bb8</code> (in the history of the built commit) |
+| Event commit | <code>fa726e885201abfa92c315cf1e1036da5b5d088a</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.12  |
+| epythet  | 0.2.15  |
 | Sphinx   | 9.1.0   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
@@ -49,14 +51,14 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ho/0.0.11/">0.0.11</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/ho/0.0.11/">0.0.11</a>, older than the documented version (0.0.12).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/ho && cd ho
-git checkout c8cae819500ff6e8ce7406b4145f39d9d349e57c
-pip install "epythet==0.2.12"
+git checkout 11a0a6512939dddff2ccab687a7818fc7f1b1a9e
+pip install "epythet==0.2.15"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

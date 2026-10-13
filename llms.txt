@@ -11,7 +11,7 @@
 - [ho.base](_autosummary/ho.base.html.md): HO base objects
 - [ho.util](_autosummary/ho.util.html.md): Utils for HO
 - [For AI agents](ai-agents.html.md): &#96;ho&#96; ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-12 18:19 UTC&#42;&#42; from commit &lt;a href="https://github.com/i2m...
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-13 11:34 UTC&#42;&#42; from commit &lt;a href="https://github.com/i2m...
 
 ## Optional
 
