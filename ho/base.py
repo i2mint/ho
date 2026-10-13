@@ -296,6 +296,18 @@ def _simple_style(value) -> str:
     return str(value)
 
 
+def _composed_text(value) -> str:
+    """A value as text inside a larger query value (``?q=is:{x}``): lists comma-joined.
+
+    >>> _composed_text(True), _composed_text([1, 'a']), _composed_text(3)
+    ('true', '1,a', '3')
+    """
+    if isinstance(value, dict):
+        raise TypeError(f"A dict cannot be part of a query value: {value!r}")
+    shown = _query_value(value)
+    return ",".join(map(str, shown)) if isinstance(shown, list) else str(shown)
+
+
 def _query_value(value):
     """A query value as ``requests`` should send it: booleans as ``true``/``false``
     (``requests`` would send ``True``), lists as repeated values.
@@ -593,7 +605,9 @@ def route_to_func(
         original_names.items(), params_schema["properties"].values()
     ):
         locations[pyname] = [(spec_name, _where(spec_name, prop))]
-    for pyname, more in echoes.items():  # (the argument is also sent as these)
+    pyname_of_key = dict(zip(params_schema["properties"], original_names))
+    for key_, more in echoes.items():  # (the argument is also sent as these)
+        pyname = pyname_of_key[key_]
         for key, prop in more:
             spec_name = prop.get(OAS_NAME_KEY, key)
             locations[pyname].append((spec_name, _where(spec_name, prop)))
@@ -622,10 +636,10 @@ def route_to_func(
                 elif where == "body":
                     split["body"][name] = value
         for key, template in query_templates.items():
-            parts = _PLACEHOLDER.findall(template)
-            if all(params.get(part) is not None for part in parts):
+            parts = {part: pyname_of_key.get(part, part) for part in _PLACEHOLDER.findall(template)}
+            if all(params.get(py) is not None for py in parts.values()):
                 split["query"][key] = _PLACEHOLDER.sub(
-                    lambda m: str(_query_value(params[m.group(1)])), template
+                    lambda m: _composed_text(params[parts[m.group(1)]]), template
                 )
         return split
 
@@ -736,7 +750,10 @@ def route_to_func(
             f"{pyname} (sent as {spec_name!r})" if pyname != spec_name else spec_name
         )
         where = locations[pyname][0][1]
-        where = "query" if where == "composed" else where
+        if where == "composed":
+            into = prop[COMPOSED_INTO_KEY]
+            params_description += f"\n    {pyname}: (part of the query value {into!r})"
+            continue
         description = described.get(
             (spec_name, where),
             # (a parameter that did not say where is keyed by None)
@@ -933,15 +950,23 @@ def url_template_to_openapi(
     query_params = []
     static_query = {}  # key -> value, for the parts of the query that are no template
     query_templates = {}  # key -> value template, for the values with several parts
+    composed_seen = set()
+
+    inline_defaults = {}
 
     def _split_placeholder(content):
         name, sep, default_value = content.partition(":")
         if sep:
+            if inline_defaults.setdefault(name, default_value) != default_value:
+                raise ValueError(
+                    f"The placeholder {{{name}}} has two defaults: "
+                    f"{inline_defaults[name]!r} and {default_value!r}."
+                )
             param_defaults[name] = default_value
         return name
 
     for key, values in parse_qs(parsed_url.query, keep_blank_values=True).items():
-        if _PLACEHOLDER.search(key):
+        if _PLACEHOLDER.search(key) or "{" in key or "}" in key:
             raise ValueError(
                 f"A placeholder in the query key {key!r} is not supported: the key "
                 "is part of the request's shape, not an argument."
@@ -953,13 +978,17 @@ def url_template_to_openapi(
             )
         (value,) = values
         contents = _PLACEHOLDER.findall(value)
+        if "{" in _PLACEHOLDER.sub("", value) or "}" in _PLACEHOLDER.sub("", value):
+            raise ValueError(f"Malformed placeholder in the query: {key}={value}")
         if not contents:
             static_query[key] = value
         elif _PLACEHOLDER.fullmatch(value):
             query_params.append((_split_placeholder(contents[0]), key, None))
         else:  # literal text around the placeholder(s)
-            names = dict.fromkeys(_split_placeholder(c) for c in contents)
-            query_params.extend((name, name, key) for name in names)
+            for name in dict.fromkeys(_split_placeholder(c) for c in contents):
+                if (name, key) not in composed_seen:  # (one parameter per part)
+                    composed_seen.add((name, key))
+                    query_params.append((name, f"{key}[{name}]", key))
             query_templates[key] = _PLACEHOLDER.sub(
                 lambda m: "{%s}" % m.group(1).partition(":")[0], value
             )
@@ -1019,7 +1048,7 @@ def url_template_to_openapi(
         schema = {"type": param_types.get(param, "string")}
         if param in param_defaults:
             schema["default"] = param_defaults[param]
-        if key != param or param in taken:
+        if key != param or param in taken or into is not None:
             schema[PYTHON_NAME_KEY] = param
         if into is not None:
             schema[COMPOSED_INTO_KEY] = into
