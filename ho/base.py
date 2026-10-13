@@ -7,8 +7,8 @@ from urllib.parse import urlparse, parse_qs, quote
 
 import requests
 
-from ju.json_schema import json_schema_to_signature, schema_param_names
-from ju.oas import Route, Routes
+from ju.json_schema import OAS_IN_KEY, json_schema_to_signature, schema_param_names
+from ju.oas import BODY_IN, Route, Routes
 
 from ho.util import SimpleMappingNamespace
 
@@ -276,6 +276,24 @@ def _simple_style(value) -> str:
     return str(value)
 
 
+def _query_value(value):
+    """A query value as ``requests`` should send it: booleans as ``true``/``false``
+    (``requests`` would send ``True``), lists as repeated values.
+
+    >>> _query_value(False), _query_value(3), _query_value([True, 'a'])
+    ('false', 3, ['true', 'a'])
+    """
+    if isinstance(value, bool):
+        return _simple_style(value)
+    if isinstance(value, (list, tuple)):
+        return [_query_value(v) for v in value]
+    return value
+
+
+#: Header parameters OpenAPI says to ignore (the request's own settings win).
+_IGNORED_HEADER_PARAMS = frozenset({"content-type"})
+
+
 def route_to_func(
     route,
     base_url: str | None = None,
@@ -408,26 +426,42 @@ def route_to_func(
     # (``$first``, ``X-MS-API-ROLE``, ``pageSize``). Requests must use the
     # spec's, so every argument is sent under its original name (i2mint/ho#2).
     original_names = schema_param_names(route.params)  # python name -> spec name
-    # Where each OpenAPI parameter goes: 'query', 'path', 'header' or 'cookie'.
-    locations = {
+    # Where each argument goes -- 'query', 'path', 'header', 'cookie' or 'body' --
+    # by Python name. A property that shares its spec name with another says where
+    # it goes itself (``x-oas-in``, ju#20); the others are told apart by name.
+    param_places = {
         p["name"]: p.get("in") for p in route.input_specs.get("parameters") or ()
     }
+    has_body = bool(route.input_specs.get("requestBody"))
+    locations = {}  # python name -> (spec name, where)
+    for (pyname, spec_name), prop in zip(
+        original_names.items(), route.params["properties"].values()
+    ):
+        where = prop.get(OAS_IN_KEY) or param_places.get(spec_name)
+        if where == BODY_IN or (where is None and has_body):
+            where = "body"
+        locations[pyname] = (spec_name, where)
 
     def _by_location(params):
         """Split bound arguments by where the spec sends them, under spec names."""
         split = {"query": {}, "path": {}, "header": {}, "cookie": {}, "body": {}}
         for pyname, value in params.items():
-            name = original_names.get(pyname, pyname)
-            where = locations.get(name)
+            name, where = locations.get(pyname, (pyname, None))
             if where == "path":
+                if value is None:
+                    raise ValueError(
+                        f"Path parameter {name!r} is required, got None."
+                    )
                 split["path"][name] = value
             elif value is None:  # an omitted optional is not sent at all
                 continue
-            elif where in ("query", "header", "cookie"):
-                split[where][name] = (
-                    value if where == "query" else _simple_style(value)
-                )
-            elif route.input_specs.get("requestBody"):
+            elif where == "query":
+                split["query"][name] = _query_value(value)
+            elif where in ("header", "cookie"):
+                if where == "header" and name.lower() in _IGNORED_HEADER_PARAMS:
+                    continue  # it would contradict the JSON body we send
+                split[where][name] = _simple_style(value)
+            elif where == "body":
                 split["body"][name] = value
         return split
 
@@ -456,7 +490,7 @@ def route_to_func(
         formatted_url = full_url
         if path_params:
             for name, value in path_params.items():
-                formatted_url = formatted_url.replace(f"{{{name}}}", quote(str(value)))
+                formatted_url = formatted_url.replace(f"{{{name}}}", quote(str(value), safe=""))
 
         # Set up headers
         headers = {"Content-Type": "application/json"}
@@ -489,8 +523,8 @@ def route_to_func(
             if split["cookie"]:
                 method_kwargs["cookies"] = split["cookie"]
 
-            if http_method == "get":
-                # For GET requests, don't include the json parameter
+            if http_method == "get" and not body_params:
+                # A GET without body arguments has no body to send
                 method_kwargs.pop("json", None)
 
             response = method_func(**method_kwargs)
@@ -522,15 +556,20 @@ def route_to_func(
     func = name_func(func, name)
     method_description = route.method_data.get("summary", "")
     params_description = ""
-    renamed = {spec: py for py, spec in original_names.items() if py != spec}
-    for param in route.input_specs.get("parameters", []):
-        spec_name = param.get("name")
+    described = {
+        (p.get("name"), p.get("in")): p.get("description", "")
+        for p in route.input_specs.get("parameters") or ()
+    }
+    for (pyname, spec_name), prop in zip(
+        original_names.items(), route.params["properties"].values()
+    ):
         shown = (
-            f"{renamed[spec_name]} (sent as {spec_name!r})"
-            if spec_name in renamed
-            else spec_name
+            f"{pyname} (sent as {spec_name!r})" if pyname != spec_name else spec_name
         )
-        params_description += f"\n    {shown}: {param.get('description', '')}"
+        description = described.get(
+            (spec_name, locations[pyname][1]), prop.get("description", "")
+        )
+        params_description += f"\n    {shown}: {description}"
 
     func.__doc__ = f"""{method_description}
     
