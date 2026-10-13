@@ -58,13 +58,54 @@ def test_names_can_be_swapped():
     assert call["params"] == {"q": 1, "term": 2}
 
 
-@pytest.mark.parametrize(
-    "template",
-    [
-        "https://x.org/s?q={a}&q={b}",  # one key, two placeholders
-        "https://x.org/s?a={x}&b={x}",  # one placeholder, two keys
-    ],
-)
-def test_ambiguous_templates_are_refused(template):
-    with pytest.raises(ValueError, match="clashes"):
-        url_template_to_func(template)
+def test_a_key_used_twice_is_refused():
+    with pytest.raises(ValueError, match="used 2 times"):
+        url_template_to_func("https://x.org/s?q={a}&q={b}")
+
+
+def test_a_placeholder_in_a_query_key_is_refused():
+    with pytest.raises(ValueError, match="query key"):
+        url_template_to_func("https://x.org/s?{k}=v")
+
+
+# --- literal parts of the query, and arguments used in several places (ho#14) ---
+
+
+def test_static_query_parts_are_always_sent():
+    func, call = _call("https://x.org/s?lang=en&q={term}&flag=", "py")
+    assert list(inspect.signature(func).parameters) == ["term"]
+    assert call["params"] == {"lang": "en", "flag": "", "q": "py"}
+
+
+def test_a_value_with_text_around_the_placeholder():
+    func, call = _call("https://x.org/s?q=lang:{x}&r={lo}-{hi:9}", "py", 1)
+    assert list(inspect.signature(func).parameters) == ["x", "lo", "hi"]
+    assert call["params"] == {"q": "lang:py", "r": "1-9"}
+
+
+def test_a_composed_value_formats_booleans_like_other_query_values():
+    _, call = _call("https://x.org/s?q=is:{on}", True)
+    assert call["params"] == {"q": "is:true"}
+
+
+def test_one_placeholder_in_two_keys_is_one_argument_sent_twice():
+    func, call = _call("https://x.org/s?a={x}&b={x}", "v")
+    assert list(inspect.signature(func).parameters) == ["x"]
+    assert call["params"] == {"a": "v", "b": "v"}
+
+
+def test_a_path_placeholder_reused_in_the_query_is_one_argument():
+    func, call = _call("https://x.org/i/{id}?item={id}", "7")
+    assert list(inspect.signature(func).parameters) == ["id"]
+    assert call["url"].endswith("/i/7") and call["params"] == {"item": "7"}
+    func, call = _call("https://x.org/i/{id}?id={id}", "7")
+    assert list(inspect.signature(func).parameters) == ["id"]
+    assert call["url"].endswith("/i/7") and call["params"] == {"id": "7"}
+
+
+def test_a_placeholder_alone_and_inside_a_composed_value():
+    func, call = _call("https://x.org/s?a={x}&b=<{x}>", "v")
+    assert list(inspect.signature(func).parameters) == ["x"]
+    assert call["params"] == {"a": "v", "b": "<v>"}
+    func, call = _call("https://x.org/s?b=<{x}>&a={x}", "v")
+    assert call["params"] == {"a": "v", "b": "<v>"}

@@ -23,6 +23,14 @@ from ho.util import SimpleMappingNamespace
 #: send under the parameter's own (spec) name, e.g. the placeholder ``search_term``
 #: of ``?q={search_term}``.
 PYTHON_NAME_KEY = "x-python-name"
+#: A query parameter's schema says ``x-ho-composed-into: <key>`` when it is one
+#: placeholder of a query value that has more in it (``?r={lo}-{hi}``); the
+#: operation's ``x-ho-query-templates`` holds that value's template (``{lo}-{hi}``).
+COMPOSED_INTO_KEY = "x-ho-composed-into"
+QUERY_TEMPLATES_KEY = "x-ho-query-templates"
+#: The operation's constant query parameters (``?lang=en``), sent on every request.
+STATIC_QUERY_KEY = "x-ho-static-query"
+_PLACEHOLDER = re.compile(r"\{([^{}]+)\}")
 
 
 def update_spec(
@@ -387,37 +395,43 @@ def _without_ignored_headers(params_schema: dict, param_places: dict) -> dict:
     }
 
 
-def _with_python_names(params_schema: dict) -> dict:
-    """The parameters schema with each ``x-python-name`` property keyed by that name,
-    recording its old key (the name the spec sends it under) as ``x-oas-name``.
+def _with_python_names(params_schema: dict):
+    """The parameters schema with each ``x-python-name`` property keyed by that name
+    (recording its old key, the name the spec sends it under, as ``x-oas-name``), and
+    the ``echoes``: properties that name an argument another property already has,
+    which send that one argument in one more place.
 
     >>> schema = {'properties': {'q': {'x-python-name': 'term'}, 'n': {}},
     ...           'required': ['q']}
     >>> _with_python_names(schema)
-    {'properties': {'term': {'x-oas-name': 'q'}, 'n': {}}, 'required': ['term']}
+    ({'properties': {'term': {'x-oas-name': 'q'}, 'n': {}}, 'required': ['term']}, {})
+    >>> schema = {'properties': {'id': {}, 'item': {'x-python-name': 'id'}}}
+    >>> _with_python_names(schema)
+    ({'properties': {'id': {}}}, {'id': [('item', {'x-oas-name': 'item'})]})
     """
     # All the renames happen at once, so that names can be swapped
-    # (``?b={a}&a={b}``); two arguments cannot end up with the same name.
+    # (``?b={a}&a={b}``).
     names = {
         key: prop.get(PYTHON_NAME_KEY) or key
         for key, prop in params_schema["properties"].items()
     }
     if all(key == name for key, name in names.items()):
-        return params_schema
-    if len(set(names.values())) < len(names):
-        raise ValueError(f"Parameters cannot share an argument name: {names}")
-    properties = {}
+        return params_schema, {}
+    properties, echoes = {}, {}
     for key, prop in params_schema["properties"].items():
         if PYTHON_NAME_KEY in prop:
             prop = {k: v for k, v in prop.items() if k != PYTHON_NAME_KEY}
             if names[key] != key:
                 prop.setdefault(OAS_NAME_KEY, key)
-        properties[names[key]] = prop
-    return {
-        **params_schema,
-        "properties": properties,
-        "required": [names[k] for k in params_schema.get("required", [])],
-    }
+        if names[key] in properties:
+            echoes.setdefault(names[key], []).append((key, prop))
+        else:
+            properties[names[key]] = prop
+    renamed = {**params_schema, "properties": properties}
+    if "required" in params_schema:
+        required = dict.fromkeys(names[k] for k in params_schema["required"])
+        renamed["required"] = list(required)
+    return renamed, echoes
 
 
 def route_to_func(
@@ -538,7 +552,7 @@ def route_to_func(
     }
     # The route's parameters, minus the headers OpenAPI says to ignore
     params_schema = _without_ignored_headers(route.params, param_places)
-    params_schema = _with_python_names(params_schema)
+    params_schema, echoes = _with_python_names(params_schema)
 
     # Get the function signature from the route parameters
     sig = json_schema_to_signature(params_schema)
@@ -564,34 +578,55 @@ def route_to_func(
     # by Python name. A property that shares its spec name with another says where
     # it goes itself (``x-oas-in``, ju#20); the others are told apart by name.
     has_body = bool(route.input_specs.get("requestBody"))
-    locations = {}  # python name -> (spec name, where)
-    for (pyname, spec_name), prop in zip(
-        original_names.items(), params_schema["properties"].values()
-    ):
+    def _where(spec_name, prop):
+        if COMPOSED_INTO_KEY in prop:
+            return "composed"  # a part of a query value (below), not sent by itself
         where = prop.get(OAS_IN_KEY) or param_places.get(spec_name)
         if where in (None, PARAM_IN) and f"{{{spec_name}}}" in route.endpoint:
             where = "path"  # a parameter that does not say where, the URL does
         if where == BODY_IN or (where in (None, PARAM_IN) and has_body):
             where = "body"
-        locations[pyname] = (spec_name, where)
+        return where
+
+    locations = {}  # python name -> [(spec name, where), ...]: where it is sent
+    for (pyname, spec_name), prop in zip(
+        original_names.items(), params_schema["properties"].values()
+    ):
+        locations[pyname] = [(spec_name, _where(spec_name, prop))]
+    for pyname, more in echoes.items():  # (the argument is also sent as these)
+        for key, prop in more:
+            spec_name = prop.get(OAS_NAME_KEY, key)
+            locations[pyname].append((spec_name, _where(spec_name, prop)))
+    method_data = getattr(route, "method_data", None) or {}
+    query_templates = method_data.get(QUERY_TEMPLATES_KEY, {})
+    static_query = method_data.get(STATIC_QUERY_KEY, {})
 
     def _by_location(params):
         """Split bound arguments by where the spec sends them, under spec names."""
-        split = {"query": {}, "path": {}, "header": {}, "cookie": {}, "body": {}}
+        split = {"query": dict(static_query), "path": {}, "header": {}, "cookie": {}}
+        split["body"] = {}
         for pyname, value in params.items():
-            name, where = locations.get(pyname, (pyname, None))
-            if where == "path":
-                if value is None:
-                    raise ValueError(f"Path parameter {name!r} is required, got None.")
-                split["path"][name] = value
-            elif value is None:  # an omitted optional is not sent at all
-                continue
-            elif where == "query":
-                split["query"][name] = _query_value(value)
-            elif where in ("header", "cookie"):
-                split[where][name] = _simple_style(value)
-            elif where == "body":
-                split["body"][name] = value
+            for name, where in locations.get(pyname, [(pyname, None)]):
+                if where == "path":
+                    if value is None:
+                        raise ValueError(
+                            f"Path parameter {name!r} is required, got None."
+                        )
+                    split["path"][name] = value
+                elif value is None:  # an omitted optional is not sent at all
+                    continue
+                elif where == "query":
+                    split["query"][name] = _query_value(value)
+                elif where in ("header", "cookie"):
+                    split[where][name] = _simple_style(value)
+                elif where == "body":
+                    split["body"][name] = value
+        for key, template in query_templates.items():
+            parts = _PLACEHOLDER.findall(template)
+            if all(params.get(part) is not None for part in parts):
+                split["query"][key] = _PLACEHOLDER.sub(
+                    lambda m: str(_query_value(params[m.group(1)])), template
+                )
         return split
 
     # (a Route-like object from a custom route_maker may not have the attribute)
@@ -700,7 +735,8 @@ def route_to_func(
         shown = (
             f"{pyname} (sent as {spec_name!r})" if pyname != spec_name else spec_name
         )
-        where = locations[pyname][1]
+        where = locations[pyname][0][1]
+        where = "query" if where == "composed" else where
         description = described.get(
             (spec_name, where),
             # (a parameter that did not say where is keyed by None)
@@ -890,37 +926,43 @@ def url_template_to_openapi(
         else:
             path_params.append(param_match)
 
-    # Extract query parameters from the URL template. Each is a (name, key) pair:
-    # the placeholder's name (the Python argument) and the key the service expects
-    # in the query string (the OpenAPI parameter's name; i2mint/ho#10).
-    query_string = parsed_url.query
+    # Extract query parameters from the URL template. Each is a (name, key, into)
+    # triple: the placeholder's name (the Python argument), the key the service
+    # expects in the query string (the OpenAPI parameter's name; i2mint/ho#10), and,
+    # if the value holds more than the placeholder (``r={lo}-{hi}``), that value's key.
     query_params = []
+    static_query = {}  # key -> value, for the parts of the query that are no template
+    query_templates = {}  # key -> value template, for the values with several parts
 
-    def _add_query_param(content, key):
+    def _split_placeholder(content):
         name, sep, default_value = content.partition(":")
         if sep:
             param_defaults[name] = default_value
-        key = name if key is None else key
-        for other_name, other_key in query_params:
-            if key == other_key or name == other_name:
-                raise ValueError(
-                    f"Query key {key!r} with placeholder {{{name}}} clashes with "
-                    f"key {other_key!r} with placeholder {{{other_name}}}: a key "
-                    "and a placeholder can each be used only once in the query."
-                )
-        query_params.append((name, key))
+        return name
 
-    if query_string:
-        for key, values in parse_qs(query_string).items():
-            param_match = re.search(r"\{([^{}]+)\}", key)
-            if param_match:
-                # A template parameter in the query parameter name
-                _add_query_param(param_match.group(1), None)
-            else:
-                for value in values:
-                    param_match = re.search(r"\{([^{}]+)\}", value)
-                    if param_match:
-                        _add_query_param(param_match.group(1), key)
+    for key, values in parse_qs(parsed_url.query, keep_blank_values=True).items():
+        if _PLACEHOLDER.search(key):
+            raise ValueError(
+                f"A placeholder in the query key {key!r} is not supported: the key "
+                "is part of the request's shape, not an argument."
+            )
+        if len(values) > 1:
+            raise ValueError(
+                f"The query key {key!r} is used {len(values)} times: use it once, "
+                "with a list as the argument if it takes several values."
+            )
+        (value,) = values
+        contents = _PLACEHOLDER.findall(value)
+        if not contents:
+            static_query[key] = value
+        elif _PLACEHOLDER.fullmatch(value):
+            query_params.append((_split_placeholder(contents[0]), key, None))
+        else:  # literal text around the placeholder(s)
+            names = dict.fromkeys(_split_placeholder(c) for c in contents)
+            query_params.extend((name, name, key) for name in names)
+            query_templates[key] = _PLACEHOLDER.sub(
+                lambda m: "{%s}" % m.group(1).partition(":")[0], value
+            )
 
     # Create OpenAPI spec from template or default
     if openapi_template is None:
@@ -970,13 +1012,18 @@ def url_template_to_openapi(
         endpoint_spec["parameters"].append(param_spec)
 
     # Add query parameters, named after the template's key; the placeholder's name
-    # (the Python argument) rides along as ``x-python-name`` (see `route_to_func`)
-    for param, key in query_params:
+    # (the Python argument) rides along as ``x-python-name`` (see `route_to_func`),
+    # which is also how an argument is shared with a path parameter or another key.
+    taken = set(path_params)
+    for param, key, into in query_params:
         schema = {"type": param_types.get(param, "string")}
         if param in param_defaults:
             schema["default"] = param_defaults[param]
-        if key != param:
+        if key != param or param in taken:
             schema[PYTHON_NAME_KEY] = param
+        if into is not None:
+            schema[COMPOSED_INTO_KEY] = into
+        taken.add(param)
         endpoint_spec["parameters"].append(
             {
                 "name": key,
@@ -986,6 +1033,10 @@ def url_template_to_openapi(
                 "description": param_descriptions.get(param, f"Parameter {param}"),
             }
         )
+    if static_query:
+        endpoint_spec[STATIC_QUERY_KEY] = static_query
+    if query_templates:
+        endpoint_spec[QUERY_TEMPLATES_KEY] = query_templates
 
     # Add response schema if provided
     if response_schema:
