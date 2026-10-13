@@ -63,3 +63,95 @@ def test_optional_openapi_params_are_optional():
     (call,) = session.calls
     assert call["url"] == "http://example.com/items/abc"
     assert call["params"] == {"first": 1}  # None-valued optionals are not sent
+
+
+# --- i2mint/ho#2: names that are not identifiers, and header parameters ---
+
+RENAMING_SPEC = {
+    "openapi": "3.0.0",
+    "info": {"title": "t", "version": "1"},
+    "paths": {
+        "/things/{thingId}": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "thingId",
+                        "in": "path",
+                        "required": True,
+                        "schema": {"type": "string"},
+                    },
+                    {"name": "$first", "in": "query", "schema": {"type": "integer"}},
+                    {"name": "pageSize", "in": "query", "schema": {"type": "integer"}},
+                    {"name": "X-MS-API-ROLE", "in": "header", "schema": {"type": "string"}},
+                    {"name": "session-id", "in": "cookie", "schema": {"type": "string"}},
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {"displayName": {"type": "string"}},
+                            }
+                        }
+                    }
+                },
+                "responses": {"200": {"description": "ok"}},
+            }
+        }
+    },
+}
+
+
+def _renaming_func():
+    session = _FakeSession()
+    (func,) = routes_to_funcs(RENAMING_SPEC, "http://example.com", session=session).values()
+    return func, session
+
+
+def test_renamed_params_are_sent_under_their_spec_names():
+    func, session = _renaming_func()
+    names = func.openapi_param_names
+    py = {spec: name for name, spec in names.items()}
+    func(
+        **{
+            py["thingId"]: "t 1",
+            py["$first"]: 5,
+            py["pageSize"]: 20,
+            py["X-MS-API-ROLE"]: "admin",
+            py["session-id"]: "s1",
+            py["displayName"]: "Thing",
+        }
+    )
+    (call,) = session.calls
+    assert call["url"] == "http://example.com/things/t%201"
+    assert call["params"] == {"$first": 5, "pageSize": 20}
+    assert call["headers"]["X-MS-API-ROLE"] == "admin"
+    assert call["cookies"] == {"session-id": "s1"}
+    assert call["json"] == {"displayName": "Thing"}, "only body properties in the body"
+
+
+def test_omitted_header_and_query_params_are_not_sent():
+    func, session = _renaming_func()
+    py = {spec: name for name, spec in func.openapi_param_names.items()}
+    func(**{py["thingId"]: "x"})
+    (call,) = session.calls
+    assert call["params"] == {}
+    assert "X-MS-API-ROLE" not in call["headers"]
+    assert "cookies" not in call
+
+
+def test_the_mapping_is_exposed_and_documented():
+    func, _ = _renaming_func()
+    names = func.openapi_param_names
+    assert set(names.values()) >= {"$first", "X-MS-API-ROLE", "pageSize", "thingId"}
+    assert all(name.isidentifier() for name in names)
+    py_first = next(n for n, spec in names.items() if spec == "$first")
+    assert f"{py_first} (sent as '$first')" in func.__doc__
+
+
+def test_header_values_use_openapi_simple_style():
+    func, session = _renaming_func()
+    py = {spec: name for name, spec in func.openapi_param_names.items()}
+    func(**{py["thingId"]: "x", py["X-MS-API-ROLE"]: ["a", True]})
+    (call,) = session.calls
+    assert call["headers"]["X-MS-API-ROLE"] == "a,true"

@@ -7,7 +7,7 @@ from urllib.parse import urlparse, parse_qs, quote
 
 import requests
 
-from ju.json_schema import json_schema_to_signature
+from ju.json_schema import json_schema_to_signature, schema_param_names
 from ju.oas import Route, Routes
 
 from ho.util import SimpleMappingNamespace
@@ -261,6 +261,21 @@ def default_route_maker(
         )
 
 
+def _simple_style(value) -> str:
+    """A header or cookie value serialised the way OpenAPI's ``simple`` style does.
+
+    >>> _simple_style(True), _simple_style(3), _simple_style(['a', 'b'])
+    ('true', '3', 'a,b')
+    """
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (list, tuple)):
+        return ",".join(_simple_style(v) for v in value)
+    if isinstance(value, bytes):
+        return value.decode()
+    return str(value)
+
+
 def route_to_func(
     route,
     base_url: str | None = None,
@@ -389,47 +404,32 @@ def route_to_func(
     _error_handler = error_handler or default_error_handler
     _egress = egress or default_response_processor
 
-    def _extract_query_params(params, required_params):
-        """Extract query parameters from all parameters"""
-        query_params = {}
-        for name, param in params.items():
-            # Check if this is a query parameter, or if the parameter is in the request body
-            if route.input_specs.get("parameters"):
-                for route_param in route.input_specs["parameters"]:
-                    if (
-                        route_param.get("name") == name
-                        and route_param.get("in") == "query"
-                    ):
-                        if param is not None:  # Only include non-None parameters
-                            query_params[name] = param
-                        break
-        return query_params
+    # The signature's names are Python identifiers; the spec's are not always
+    # (``$first``, ``X-MS-API-ROLE``, ``pageSize``). Requests must use the
+    # spec's, so every argument is sent under its original name (i2mint/ho#2).
+    original_names = schema_param_names(route.params)  # python name -> spec name
+    # Where each OpenAPI parameter goes: 'query', 'path', 'header' or 'cookie'.
+    locations = {
+        p["name"]: p.get("in") for p in route.input_specs.get("parameters") or ()
+    }
 
-    def _extract_path_params(params):
-        """Extract path parameters from all parameters"""
-        path_params = {}
-        for name, param in params.items():
-            # Check if this parameter is in the path
-            if route.input_specs.get("parameters"):
-                for route_param in route.input_specs["parameters"]:
-                    if (
-                        route_param.get("name") == name
-                        and route_param.get("in") == "path"
-                    ):
-                        path_params[name] = param
-                        break
-        return path_params
-
-    def _extract_body_params(params, query_params, path_params):
-        """Extract body parameters (all parameters not in query or path)"""
-        body_params = {}
-        # If there's a requestBody in the spec, include all parameters that aren't query or path
-        if route.input_specs.get("requestBody"):
-            for name, param in params.items():
-                if name not in query_params and name not in path_params:
-                    if param is not None:  # Only include non-None parameters
-                        body_params[name] = param
-        return body_params
+    def _by_location(params):
+        """Split bound arguments by where the spec sends them, under spec names."""
+        split = {"query": {}, "path": {}, "header": {}, "cookie": {}, "body": {}}
+        for pyname, value in params.items():
+            name = original_names.get(pyname, pyname)
+            where = locations.get(name)
+            if where == "path":
+                split["path"][name] = value
+            elif value is None:  # an omitted optional is not sent at all
+                continue
+            elif where in ("query", "header", "cookie"):
+                split[where][name] = (
+                    value if where == "query" else _simple_style(value)
+                )
+            elif route.input_specs.get("requestBody"):
+                split["body"][name] = value
+        return split
 
     @sig
     def func(*args, **kwargs):
@@ -444,10 +444,13 @@ def route_to_func(
         bound_args.apply_defaults()
         params = bound_args.arguments
 
-        # Extract different types of parameters
-        query_params = _extract_query_params(params, sig.parameters)
-        path_params = _extract_path_params(params)
-        body_params = _extract_body_params(params, query_params, path_params)
+        # Split them by where the spec sends them, under the spec's names
+        split = _by_location(params)
+        query_params, path_params, body_params = (
+            split["query"],
+            split["path"],
+            split["body"],
+        )
 
         # Format URL with path parameters
         formatted_url = full_url
@@ -459,6 +462,7 @@ def route_to_func(
         headers = {"Content-Type": "application/json"}
         if custom_headers:
             headers.update(custom_headers)
+        headers.update(split["header"])  # the call's own, over the defaults
 
         # Send the request using either the provided session or a new session
         current_session = session or requests
@@ -482,6 +486,8 @@ def route_to_func(
                 headers=headers,
                 timeout=timeout,
             )
+            if split["cookie"]:
+                method_kwargs["cookies"] = split["cookie"]
 
             if http_method == "get":
                 # For GET requests, don't include the json parameter
@@ -516,10 +522,15 @@ def route_to_func(
     func = name_func(func, name)
     method_description = route.method_data.get("summary", "")
     params_description = ""
+    renamed = {spec: py for py, spec in original_names.items() if py != spec}
     for param in route.input_specs.get("parameters", []):
-        params_description += (
-            f"\n    {param.get('name')}: {param.get('description', '')}"
+        spec_name = param.get("name")
+        shown = (
+            f"{renamed[spec_name]} (sent as {spec_name!r})"
+            if spec_name in renamed
+            else spec_name
         )
+        params_description += f"\n    {shown}: {param.get('description', '')}"
 
     func.__doc__ = f"""{method_description}
     
@@ -531,6 +542,9 @@ def route_to_func(
     --------
     The processed response from the API, typically as JSON.
     """
+    # Python name -> the name the spec uses, for callers that must translate
+    # back (a pagination cursor named ``$after``, say). i2mint/ho#1, #2.
+    func.openapi_param_names = dict(original_names)
 
     return func
 
