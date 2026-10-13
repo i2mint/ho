@@ -133,3 +133,13 @@ def test_the_docstring_lists_body_properties_and_renames(api):
     assert "name_body (sent as 'name'): the thing's name" in doc
     assert "name: a filter" in doc
     assert "pageSize" in doc
+
+
+def test_a_session_only_needs_the_method_the_route_uses():
+    from types import SimpleNamespace
+
+    calls = []
+    session = SimpleNamespace(get=lambda **kw: calls.append(kw) or _FakeSession().get())
+    spec = {"openapi": "3.0.0", "paths": {"/p": {"get": {"responses": {}}}}}
+    routes_to_funcs(spec, "http://e.com", session=session)["get", "/p"]()
+    assert calls[0]["url"] == "http://e.com/p"
