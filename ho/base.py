@@ -590,6 +590,7 @@ def route_to_func(
     # by Python name. A property that shares its spec name with another says where
     # it goes itself (``x-oas-in``, ju#20); the others are told apart by name.
     has_body = bool(route.input_specs.get("requestBody"))
+
     def _where(spec_name, prop):
         if COMPOSED_INTO_KEY in prop:
             return "composed"  # a part of a query value (below), not sent by itself
@@ -636,7 +637,10 @@ def route_to_func(
                 elif where == "body":
                     split["body"][name] = value
         for key, template in query_templates.items():
-            parts = {part: pyname_of_key.get(part, part) for part in _PLACEHOLDER.findall(template)}
+            parts = {
+                part: pyname_of_key.get(part, part)
+                for part in _PLACEHOLDER.findall(template)
+            }
             if all(params.get(py) is not None for py in parts.values()):
                 split["query"][key] = _PLACEHOLDER.sub(
                     lambda m: _composed_text(params[parts[m.group(1)]]), template
