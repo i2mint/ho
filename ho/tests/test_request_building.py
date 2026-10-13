@@ -108,9 +108,14 @@ def test_a_get_without_body_arguments_sends_no_body(api):
     assert "json" not in session.calls[0]
 
 
-def test_a_content_type_header_parameter_does_not_replace_the_json_one(api):
+def test_content_type_header_parameters_are_not_arguments(api):
+    """OpenAPI: Accept, Content-Type and Authorization header parameters are ignored."""
+    import inspect
+
     funcs, session = api
-    funcs["get", "/items/{id}"]("x", name="n", content_type="text/plain")
+    func = funcs["get", "/items/{id}"]
+    assert "content_type" not in inspect.signature(func).parameters
+    func("x", name="n")
     assert session.calls[0]["headers"]["Content-Type"] == "application/json"
 
 
@@ -143,3 +148,83 @@ def test_a_session_only_needs_the_method_the_route_uses():
     spec = {"openapi": "3.0.0", "paths": {"/p": {"get": {"responses": {}}}}}
     routes_to_funcs(spec, "http://e.com", session=session)["get", "/p"]()
     assert calls[0]["url"] == "http://e.com/p"
+
+
+_FORMS_SPEC = {
+    "openapi": "3.0.0",
+    "paths": {
+        "/form/{flag}": {
+            "post": {
+                "parameters": [
+                    {"name": "flag", "in": "path", "required": True, "schema": {"type": "boolean"}},
+                    {"name": "Accept", "in": "header", "required": True, "schema": {"type": "string"}},
+                    {"name": "Authorization", "in": "header", "schema": {"type": "string"}},
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {"properties": {"on": {"type": "boolean"}, "tags": {"type": "array"}}}
+                        }
+                    }
+                },
+            }
+        },
+        "/upload": {
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {"properties": {"file": {"type": "string"}, "n": {"type": "integer"}}}
+                        }
+                    }
+                }
+            }
+        },
+    },
+}
+
+
+@pytest.fixture
+def forms():
+    session = _FakeSession()
+    return routes_to_funcs(_FORMS_SPEC, "http://e.com", session=session), session
+
+
+def test_path_booleans_and_lists_are_serialised_not_str_ed(forms):
+    funcs, session = forms
+    funcs["post", "/form/{flag}"](True)
+    assert session.calls[0]["url"] == "http://e.com/form/true"
+
+
+def test_ignored_header_parameters_are_dropped_from_the_signature(forms):
+    import inspect
+
+    funcs, _ = forms
+    names = set(inspect.signature(funcs["post", "/form/{flag}"]).parameters)
+    assert not {"accept", "authorization"} & names
+
+
+def test_a_form_body_is_sent_as_form_data_without_a_json_content_type(forms):
+    funcs, session = forms
+    funcs["post", "/form/{flag}"](False, on=True, tags=["a", "b"])
+    call = session.calls[0]
+    assert call["data"] == {"on": "true", "tags": ["a", "b"]}
+    assert "json" not in call and "Content-Type" not in call["headers"]
+
+
+def test_a_multipart_body_is_sent_as_files(forms):
+    funcs, session = forms
+    funcs["post", "/upload"](file=b"bytes", n=3)
+    call = session.calls[0]
+    assert call["files"] == {"file": (None, b"bytes"), "n": (None, "3")}
+    assert "json" not in call and "Content-Type" not in call["headers"]
+
+
+def test_a_path_parameter_that_does_not_say_where_is_found_in_the_url():
+    spec = {
+        "openapi": "3.0.0",
+        "paths": {"/i/{id}": {"get": {"parameters": [{"name": "id", "schema": {"type": "string"}}]}}},
+    }
+    session = _FakeSession()
+    routes_to_funcs(spec, "http://e.com", session=session)["get", "/i/{id}"]("7")
+    assert session.calls[0]["url"] == "http://e.com/i/7"

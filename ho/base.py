@@ -7,7 +7,12 @@ from urllib.parse import urlparse, parse_qs, quote
 
 import requests
 
-from ju.json_schema import OAS_IN_KEY, json_schema_to_signature, schema_param_names
+from ju.json_schema import (
+    OAS_IN_KEY,
+    OAS_NAME_KEY,
+    json_schema_to_signature,
+    schema_param_names,
+)
 from ju.oas import BODY_IN, Route, Routes
 
 from ho.util import SimpleMappingNamespace
@@ -293,8 +298,58 @@ def _query_value(value):
 #: HTTP methods a generated function can send.
 _HTTP_METHODS = frozenset({"get", "post", "put", "delete", "patch"})
 
-#: Header parameters OpenAPI says to ignore (the request's own settings win).
-_IGNORED_HEADER_PARAMS = frozenset({"content-type"})
+#: Header parameters OpenAPI says to ignore (the request's own settings win;
+#: ``custom_headers`` is how a caller sets ``Authorization``).
+_IGNORED_HEADER_PARAMS = frozenset({"accept", "content-type", "authorization"})
+
+#: Media types of request bodies that are not sent as JSON.
+_FORM_MEDIA_TYPE = "application/x-www-form-urlencoded"
+_MULTIPART_MEDIA_TYPE = "multipart/form-data"
+
+
+def _path_value(value) -> str:
+    """A path value, serialised as OpenAPI's ``simple`` style and percent-encoded
+    (``/`` included), a list's items joined with an unescaped comma.
+
+    >>> _path_value(True), _path_value('a/b c'), _path_value(['x y', 2])
+    ('true', 'a%2Fb%20c', 'x%20y,2')
+    """
+    if isinstance(value, (list, tuple)):
+        return ",".join(_path_value(v) for v in value)
+    return quote(_simple_style(value), safe="")
+
+
+def _multipart_field(value):
+    """A multipart field for ``requests``: bytes and files as they are, the rest as text.
+
+    >>> _multipart_field(True), _multipart_field(b'raw')
+    ((None, 'true'), (None, b'raw'))
+    """
+    if isinstance(value, bytes) or hasattr(value, "read"):
+        return (None, value)
+    return (None, _simple_style(value))
+
+
+def _without_ignored_headers(params_schema: dict, param_places: dict) -> dict:
+    """The parameters schema minus the header parameters OpenAPI says to ignore.
+
+    >>> schema = {'properties': {'a': {}, 'Accept': {}}, 'required': ['Accept']}
+    >>> _without_ignored_headers(schema, {'Accept': 'header', 'a': 'query'})
+    {'properties': {'a': {}}, 'required': []}
+    """
+    ignored = set()
+    for key, prop in params_schema["properties"].items():
+        name = prop.get(OAS_NAME_KEY, key)
+        where = prop.get(OAS_IN_KEY) or param_places.get(name)
+        if where == "header" and name.lower() in _IGNORED_HEADER_PARAMS:
+            ignored.add(key)
+    return {
+        **params_schema,
+        "properties": {
+            k: v for k, v in params_schema["properties"].items() if k not in ignored
+        },
+        "required": [k for k in params_schema.get("required", []) if k not in ignored],
+    }
 
 
 def route_to_func(
@@ -409,8 +464,15 @@ def route_to_func(
                     "No base_url provided and no servers defined in the OpenAPI spec"
                 )
 
+    # Where each OpenAPI parameter goes, by its spec name
+    param_places = {
+        p["name"]: p.get("in") for p in route.input_specs.get("parameters") or ()
+    }
+    # The route's parameters, minus the headers OpenAPI says to ignore
+    params_schema = _without_ignored_headers(route.params, param_places)
+
     # Get the function signature from the route parameters
-    sig = json_schema_to_signature(route.params)
+    sig = json_schema_to_signature(params_schema)
 
     # Ensure the base URL doesn't end with a slash if the endpoint starts with one
     clean_base_url = base_url.rstrip("/")
@@ -428,19 +490,18 @@ def route_to_func(
     # The signature's names are Python identifiers; the spec's are not always
     # (``$first``, ``X-MS-API-ROLE``, ``pageSize``). Requests must use the
     # spec's, so every argument is sent under its original name (i2mint/ho#2).
-    original_names = schema_param_names(route.params)  # python name -> spec name
+    original_names = schema_param_names(params_schema)  # python name -> spec name
     # Where each argument goes -- 'query', 'path', 'header', 'cookie' or 'body' --
     # by Python name. A property that shares its spec name with another says where
     # it goes itself (``x-oas-in``, ju#20); the others are told apart by name.
-    param_places = {
-        p["name"]: p.get("in") for p in route.input_specs.get("parameters") or ()
-    }
     has_body = bool(route.input_specs.get("requestBody"))
     locations = {}  # python name -> (spec name, where)
     for (pyname, spec_name), prop in zip(
-        original_names.items(), route.params["properties"].values()
+        original_names.items(), params_schema["properties"].values()
     ):
         where = prop.get(OAS_IN_KEY) or param_places.get(spec_name)
+        if where is None and f"{{{spec_name}}}" in route.endpoint:
+            where = "path"  # a parameter that does not say where, the URL does
         if where == BODY_IN or (where is None and has_body):
             where = "body"
         locations[pyname] = (spec_name, where)
@@ -459,8 +520,6 @@ def route_to_func(
             elif where == "query":
                 split["query"][name] = _query_value(value)
             elif where in ("header", "cookie"):
-                if where == "header" and name.lower() in _IGNORED_HEADER_PARAMS:
-                    continue  # it would contradict the JSON body we send
                 split[where][name] = _simple_style(value)
             elif where == "body":
                 split["body"][name] = value
@@ -492,11 +551,15 @@ def route_to_func(
         if path_params:
             for name, value in path_params.items():
                 formatted_url = formatted_url.replace(
-                    f"{{{name}}}", quote(str(value), safe="")
+                    f"{{{name}}}", _path_value(value)
                 )
 
         # Set up headers
-        headers = {"Content-Type": "application/json"}
+        body_type = (route.body_content_type or "").split(";")[0].strip().lower()
+        sent_as_form = body_type in (_FORM_MEDIA_TYPE, _MULTIPART_MEDIA_TYPE)
+        # A form body's Content-Type is for ``requests`` to set (multipart needs
+        # its boundary); everything else is sent as JSON.
+        headers = {} if sent_as_form else {"Content-Type": "application/json"}
         if custom_headers:
             headers.update(custom_headers)
         headers.update(split["header"])  # the call's own, over the defaults
@@ -513,16 +576,22 @@ def route_to_func(
             method_kwargs = dict(
                 url=formatted_url,
                 params=query_params,
-                json=body_params,
                 headers=headers,
                 timeout=timeout,
             )
+            if body_type == _FORM_MEDIA_TYPE:
+                method_kwargs["data"] = {
+                    k: _query_value(v) for k, v in body_params.items()
+                }
+            elif body_type == _MULTIPART_MEDIA_TYPE:
+                method_kwargs["files"] = {
+                    k: _multipart_field(v) for k, v in body_params.items()
+                }
+            elif http_method != "get" or body_params:
+                # (a GET without body arguments has no body to send)
+                method_kwargs["json"] = body_params
             if split["cookie"]:
                 method_kwargs["cookies"] = split["cookie"]
-
-            if http_method == "get" and not body_params:
-                # A GET without body arguments has no body to send
-                method_kwargs.pop("json", None)
 
             response = method_func(**method_kwargs)
 
@@ -558,7 +627,7 @@ def route_to_func(
         for p in route.input_specs.get("parameters") or ()
     }
     for (pyname, spec_name), prop in zip(
-        original_names.items(), route.params["properties"].values()
+        original_names.items(), params_schema["properties"].values()
     ):
         shown = (
             f"{pyname} (sent as {spec_name!r})" if pyname != spec_name else spec_name
