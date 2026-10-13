@@ -56,6 +56,9 @@ The core pipeline is: **URL template → OpenAPI 3.0.3 spec → `ju.oas.Route` �
 - Path params: `https://api.example.com/users/{id}`
 - Query params: `https://api.example.com/search?q={query}`
 - Inline defaults: `{param:default_value}` (e.g., `{page:1}`, `{limit:10}`)
+- The query key is what is sent; the placeholder is the Python argument (`?q={term}` sends `q=`)
+- Literal query parts are sent on every request (`?lang=en`); text around placeholders is kept (`?r={lo}-{hi}`)
+- A placeholder used in several places (`/i/{id}?item={id}`, `?a={x}&b={x}`) is one argument; a repeated query key or a placeholder in a key is refused
 
 ## Development
 
