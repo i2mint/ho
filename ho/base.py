@@ -290,6 +290,9 @@ def _query_value(value):
     return value
 
 
+#: HTTP methods a generated function can send.
+_HTTP_METHODS = frozenset({"get", "post", "put", "delete", "patch"})
+
 #: Header parameters OpenAPI says to ignore (the request's own settings win).
 _IGNORED_HEADER_PARAMS = frozenset({"content-type"})
 
@@ -502,16 +505,10 @@ def route_to_func(
         current_session = session or requests
 
         try:
-            # Map HTTP methods to their corresponding session methods
-            method_map = {
-                method: getattr(current_session, method)
-                for method in ["get", "post", "put", "delete", "patch"]
-            }
-
-            if http_method not in method_map:
+            if http_method not in _HTTP_METHODS:
                 raise ValueError(f"Unsupported HTTP method: {http_method}")
-            else:
-                method_func = method_map[http_method]
+            # Only the method this route uses is needed from the session
+            method_func = getattr(current_session, http_method)
 
             method_kwargs = dict(
                 url=formatted_url,
@@ -923,12 +920,21 @@ def url_template_to_func(
 
     Example:
     --------
+    >>> from types import SimpleNamespace
+    >>> sent = []
+    >>> def fake_get(**kwargs):  # stands in for a real session, so no network
+    ...     sent.append(kwargs)
+    ...     return SimpleNamespace(text="<html>", raise_for_status=lambda: None)
     >>> search_google = url_template_to_func(
     ...     "https://www.google.com/search?q={search_term}",
     ...     description="Search Google",
-    ...     egress=lambda response: response.text
+    ...     egress=lambda response: response.text,
+    ...     session=SimpleNamespace(get=fake_get),
     ... )
-    >>> results = search_google(search_term="Python")
+    >>> search_google(search_term="Python")
+    '<html>'
+    >>> sent[0]["url"]
+    'https://www.google.com/search'
 
     >>> # Example using REST Countries API with path and query parameters
     >>> get_country = url_template_to_func(
