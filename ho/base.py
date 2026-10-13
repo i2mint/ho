@@ -396,23 +396,27 @@ def _with_python_names(params_schema: dict) -> dict:
     >>> _with_python_names(schema)
     {'properties': {'term': {'x-oas-name': 'q'}, 'n': {}}, 'required': ['term']}
     """
-    renames = {}
-    for key, prop in params_schema["properties"].items():
-        name = prop.get(PYTHON_NAME_KEY)
-        if name and name != key and name not in params_schema["properties"]:
-            renames[key] = name
-    if not renames:
+    # All the renames happen at once, so that names can be swapped
+    # (``?b={a}&a={b}``); two arguments cannot end up with the same name.
+    names = {
+        key: prop.get(PYTHON_NAME_KEY) or key
+        for key, prop in params_schema["properties"].items()
+    }
+    if all(key == name for key, name in names.items()):
         return params_schema
+    if len(set(names.values())) < len(names):
+        raise ValueError(f"Parameters cannot share an argument name: {names}")
     properties = {}
     for key, prop in params_schema["properties"].items():
-        if key in renames:
+        if PYTHON_NAME_KEY in prop:
             prop = {k: v for k, v in prop.items() if k != PYTHON_NAME_KEY}
-            prop.setdefault(OAS_NAME_KEY, key)
-        properties[renames.get(key, key)] = prop
+            if names[key] != key:
+                prop.setdefault(OAS_NAME_KEY, key)
+        properties[names[key]] = prop
     return {
         **params_schema,
         "properties": properties,
-        "required": [renames.get(k, k) for k in params_schema.get("required", [])],
+        "required": [names[k] for k in params_schema.get("required", [])],
     }
 
 
@@ -898,10 +902,14 @@ def url_template_to_openapi(
         name, sep, default_value = content.partition(":")
         if sep:
             param_defaults[name] = default_value
-        # (a key used twice keeps the placeholder's name for the later ones, as
-        # one OpenAPI query parameter cannot be two arguments)
-        if key is None or key in (k for _, k in query_params):
-            key = name
+        key = name if key is None else key
+        for other_name, other_key in query_params:
+            if key == other_key or name == other_name:
+                raise ValueError(
+                    f"Query key {key!r} with placeholder {{{name}}} clashes with "
+                    f"key {other_key!r} with placeholder {{{other_name}}}: a key "
+                    "and a placeholder can each be used only once in the query."
+                )
         query_params.append((name, key))
 
     if query_string:

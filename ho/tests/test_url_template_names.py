@@ -3,6 +3,8 @@
 
 import inspect
 
+import pytest
+
 from ho.base import url_template_to_func, url_template_to_openapi
 from ho.tests.test_optional_params import _FakeSession
 
@@ -48,6 +50,21 @@ def test_same_name_keys_and_placeholders_are_unchanged():
     assert call["params"] == {"q": "v"}
 
 
-def test_a_key_used_twice_keeps_the_later_placeholder_name():
-    _, call = _call("https://x.org/s?q={a}&q={b}", "1", "2")
-    assert call["params"] == {"q": "1", "b": "2"}
+def test_names_can_be_swapped():
+    func, call = _call("https://x.org/s?b={a}&q={b}", 1, 2)
+    assert list(inspect.signature(func).parameters) == ["a", "b"]
+    assert call["params"] == {"b": 1, "q": 2}
+    func, call = _call("https://x.org/s?q={term}&term={q}", 1, 2)
+    assert call["params"] == {"q": 1, "term": 2}
+
+
+@pytest.mark.parametrize(
+    "template",
+    [
+        "https://x.org/s?q={a}&q={b}",  # one key, two placeholders
+        "https://x.org/s?a={x}&b={x}",  # one placeholder, two keys
+    ],
+)
+def test_ambiguous_templates_are_refused(template):
+    with pytest.raises(ValueError, match="clashes"):
+        url_template_to_func(template)
