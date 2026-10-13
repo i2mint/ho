@@ -1,4 +1,4 @@
-> built 2026-10-13 12:38 UTC from a59937c (master) · ho 0.0.14. Details: build_info.json
+> built 2026-10-13 14:22 UTC from 3e6131b (master) · ho 0.0.15. Details: build_info.json
 
 # index.html.md
 
@@ -240,8 +240,10 @@ HO base objects
 
 ### Module Attributes
 
-| [`PYTHON_NAME_KEY`](_autosummary/ho.base.html.md#ho.base.PYTHON_NAME_KEY)   | A parameter schema's `x-python-name` is the name of the Python argument to send under the parameter's own (spec) name, e.g. the placeholder `search_term` of `?q={search_term}`.   |
-|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`PYTHON_NAME_KEY`](_autosummary/ho.base.html.md#ho.base.PYTHON_NAME_KEY)   | A parameter schema's `x-python-name` is the name of the Python argument to send under the parameter's own (spec) name, e.g. the placeholder `search_term` of `?q={search_term}`.                                                |
+|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`COMPOSED_INTO_KEY`](_autosummary/ho.base.html.md#ho.base.COMPOSED_INTO_KEY) | A query parameter's schema says `x-ho-composed-into: <key>` when it is one placeholder of a query value that has more in it (`?r={lo}-{hi}`); the operation's `x-ho-query-templates` holds that value's template (`{lo}-{hi}`). |
+| [`STATIC_QUERY_KEY`](_autosummary/ho.base.html.md#ho.base.STATIC_QUERY_KEY)  | The operation's constant query parameters (`?lang=en`), sent on every request.                                                                                                                                                  |
 
 ### Functions
 
@@ -257,11 +259,21 @@ HO base objects
 | [`url_template_to_func`](_autosummary/ho.base.html.md#ho.base.url_template_to_func)(url_template, \*[, ...])     | Convert a URL template directly to a Python function.                                  |
 | [`url_template_to_openapi`](_autosummary/ho.base.html.md#ho.base.url_template_to_openapi)(url_template, \*[, ...])  | Convert a URL template with placeholders to an OpenAPI specification.                  |
 
+### ho.base.COMPOSED_INTO_KEY *= 'x-ho-composed-into'*
+
+A query parameter’s schema says `x-ho-composed-into: <key>` when it is one
+placeholder of a query value that has more in it (`?r={lo}-{hi}`); the
+operation’s `x-ho-query-templates` holds that value’s template (`{lo}-{hi}`).
+
 ### ho.base.PYTHON_NAME_KEY *= 'x-python-name'*
 
 A parameter schema’s `x-python-name` is the name of the Python argument to
 send under the parameter’s own (spec) name, e.g. the placeholder `search_term`
 of `?q={search_term}`.
+
+### ho.base.STATIC_QUERY_KEY *= 'x-ho-static-query'*
+
+The operation’s constant query parameters (`?lang=en`), sent on every request.
 
 ### ho.base.default_error_handler(response, exception=None)
 
@@ -641,20 +653,20 @@ Extract all placeholders from a URL template, including their inline defaults.
 
 # About this build
 
-This documentation was built on **2026-10-13 12:38 UTC** from commit <a href="https://github.com/i2mint/ho/commit/a59937c2a7e82b3f2684794dd608901dd6bbf944"><code>a59937c</code></a> on branch <code>master</code>, for **ho 0.0.14** (from <code>setup.cfg</code>).
+This documentation was built on **2026-10-13 14:22 UTC** from commit <a href="https://github.com/i2mint/ho/commit/3e6131b8bdf4154bd57db769f3efa7fe865b6455"><code>3e6131b</code></a> on branch <code>master</code>, for **ho 0.0.15** (from <code>setup.cfg</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.14) is ahead of the latest release on PyPI (0.0.13): these docs describe unreleased code.
+- The documented version (0.0.15) is ahead of the latest release on PyPI (0.0.14): these docs describe unreleased code.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/ho/commit/a59937c2a7e82b3f2684794dd608901dd6bbf944"><code>a59937c2a7e82b3f2684794dd608901dd6bbf944</code></a> |
+| Commit              | <a href="https://github.com/i2mint/ho/commit/3e6131b8bdf4154bd57db769f3efa7fe865b6455"><code>3e6131b8bdf4154bd57db769f3efa7fe865b6455</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
-| Tags at this commit | <code>0.0.14</code>                                                                                                                              |
+| Tags at this commit | <code>0.0.15</code>                                                                                                                              |
 | Working tree        | clean                                                                                                                                            |
 | Remote              | <code>https://github.com/i2mint/ho</code>                                                                                                        |
 
@@ -663,9 +675,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/ho</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/ho/actions/runs/38398562633">38398562633</a>            |
+| Run          | <a href="https://github.com/i2mint/ho/actions/runs/38412576830">38412576830</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>1a706db8253bb8e9906a0516b1f5bba812e69074</code> (in the history of the built commit) |
+| Event commit | <code>35e91e82f3f4f2a082ab09aa347a9a267274f3c7</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -690,13 +702,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ho/0.0.13/">0.0.13</a>, older than the documented version (0.0.14).
+Latest release: <a href="https://pypi.org/project/ho/0.0.14/">0.0.14</a>, older than the documented version (0.0.15).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/ho && cd ho
-git checkout a59937c2a7e82b3f2684794dd608901dd6bbf944
+git checkout 3e6131b8bdf4154bd57db769f3efa7fe865b6455
 pip install "epythet==0.2.15"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

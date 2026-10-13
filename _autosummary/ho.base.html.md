@@ -4,8 +4,10 @@ HO base objects
 
 ### Module Attributes
 
-| [`PYTHON_NAME_KEY`](#ho.base.PYTHON_NAME_KEY)   | A parameter schema's `x-python-name` is the name of the Python argument to send under the parameter's own (spec) name, e.g. the placeholder `search_term` of `?q={search_term}`.   |
-|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`PYTHON_NAME_KEY`](#ho.base.PYTHON_NAME_KEY)   | A parameter schema's `x-python-name` is the name of the Python argument to send under the parameter's own (spec) name, e.g. the placeholder `search_term` of `?q={search_term}`.                                                |
+|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`COMPOSED_INTO_KEY`](#ho.base.COMPOSED_INTO_KEY) | A query parameter's schema says `x-ho-composed-into: <key>` when it is one placeholder of a query value that has more in it (`?r={lo}-{hi}`); the operation's `x-ho-query-templates` holds that value's template (`{lo}-{hi}`). |
+| [`STATIC_QUERY_KEY`](#ho.base.STATIC_QUERY_KEY)  | The operation's constant query parameters (`?lang=en`), sent on every request.                                                                                                                                                  |
 
 ### Functions
 
@@ -21,11 +23,21 @@ HO base objects
 | [`url_template_to_func`](#ho.base.url_template_to_func)(url_template, \*[, ...])     | Convert a URL template directly to a Python function.                                  |
 | [`url_template_to_openapi`](#ho.base.url_template_to_openapi)(url_template, \*[, ...])  | Convert a URL template with placeholders to an OpenAPI specification.                  |
 
+### ho.base.COMPOSED_INTO_KEY *= 'x-ho-composed-into'*
+
+A query parameter’s schema says `x-ho-composed-into: <key>` when it is one
+placeholder of a query value that has more in it (`?r={lo}-{hi}`); the
+operation’s `x-ho-query-templates` holds that value’s template (`{lo}-{hi}`).
+
 ### ho.base.PYTHON_NAME_KEY *= 'x-python-name'*
 
 A parameter schema’s `x-python-name` is the name of the Python argument to
 send under the parameter’s own (spec) name, e.g. the placeholder `search_term`
 of `?q={search_term}`.
+
+### ho.base.STATIC_QUERY_KEY *= 'x-ho-static-query'*
+
+The operation’s constant query parameters (`?lang=en`), sent on every request.
 
 ### ho.base.default_error_handler(response, exception=None)
 

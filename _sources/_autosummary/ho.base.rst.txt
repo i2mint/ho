@@ -9,6 +9,8 @@ ho.base
    .. autosummary::
    
       PYTHON_NAME_KEY
+      COMPOSED_INTO_KEY
+      STATIC_QUERY_KEY
    
    .. rubric:: Functions
 

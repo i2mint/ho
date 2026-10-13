@@ -84,7 +84,9 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#ho.base.COMPOSED_INTO_KEY"><code class="docutils literal notranslate"><span class="pre">COMPOSED_INTO_KEY</span></code></a></li>
 <li><a class="reference internal" href="#ho.base.PYTHON_NAME_KEY"><code class="docutils literal notranslate"><span class="pre">PYTHON_NAME_KEY</span></code></a></li>
+<li><a class="reference internal" href="#ho.base.STATIC_QUERY_KEY"><code class="docutils literal notranslate"><span class="pre">STATIC_QUERY_KEY</span></code></a></li>
 <li><a class="reference internal" href="#ho.base.default_error_handler"><code class="docutils literal notranslate"><span class="pre">default_error_handler()</span></code></a></li>
 <li><a class="reference internal" href="#ho.base.default_response_processor"><code class="docutils literal notranslate"><span class="pre">default_response_processor()</span></code></a></li>
 <li><a class="reference internal" href="#ho.base.default_route_maker"><code class="docutils literal notranslate"><span class="pre">default_route_maker()</span></code></a></li>
@@ -142,6 +144,12 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-odd"><td><p><a class="reference internal" href="#ho.base.PYTHON_NAME_KEY" title="ho.base.PYTHON_NAME_KEY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PYTHON_NAME_KEY</span></code></a></p></td>
 <td><p>A parameter schema's <code class="docutils literal notranslate"><span class="pre">x-python-name</span></code> is the name of the Python argument to send under the parameter's own (spec) name, e.g. the placeholder <code class="docutils literal notranslate"><span class="pre">search_term</span></code> of <code class="docutils literal notranslate"><span class="pre">?q={search_term}</span></code>.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ho.base.COMPOSED_INTO_KEY" title="ho.base.COMPOSED_INTO_KEY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">COMPOSED_INTO_KEY</span></code></a></p></td>
+<td><p>A query parameter's schema says <code class="docutils literal notranslate"><span class="pre">x-ho-composed-into:</span> <span class="pre">&lt;key&gt;</span></code> when it is one placeholder of a query value that has more in it (<code class="docutils literal notranslate"><span class="pre">?r={lo}-{hi}</span></code>); the operation's <code class="docutils literal notranslate"><span class="pre">x-ho-query-templates</span></code> holds that value's template (<code class="docutils literal notranslate"><span class="pre">{lo}-{hi}</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ho.base.STATIC_QUERY_KEY" title="ho.base.STATIC_QUERY_KEY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">STATIC_QUERY_KEY</span></code></a></p></td>
+<td><p>The operation's constant query parameters (<code class="docutils literal notranslate"><span class="pre">?lang=en</span></code>), sent on every request.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -183,11 +191,25 @@ data-aria-dark="Switch to auto color mode">
 </table>
 </div>
 <dl class="py data">
+<dt class="sig sig-object py" id="ho.base.COMPOSED_INTO_KEY">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">COMPOSED_INTO_KEY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'x-ho-composed-into'</span></span><a class="headerlink" href="#ho.base.COMPOSED_INTO_KEY" title="Link to this definition">#</a></dt>
+<dd><p>A query parameter’s schema says <code class="docutils literal notranslate"><span class="pre">x-ho-composed-into:</span> <span class="pre">&lt;key&gt;</span></code> when it is one
+placeholder of a query value that has more in it (<code class="docutils literal notranslate"><span class="pre">?r={lo}-{hi}</span></code>); the
+operation’s <code class="docutils literal notranslate"><span class="pre">x-ho-query-templates</span></code> holds that value’s template (<code class="docutils literal notranslate"><span class="pre">{lo}-{hi}</span></code>).</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="ho.base.PYTHON_NAME_KEY">
 <span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">PYTHON_NAME_KEY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'x-python-name'</span></span><a class="headerlink" href="#ho.base.PYTHON_NAME_KEY" title="Link to this definition">#</a></dt>
 <dd><p>A parameter schema’s <code class="docutils literal notranslate"><span class="pre">x-python-name</span></code> is the name of the Python argument to
 send under the parameter’s own (spec) name, e.g. the placeholder <code class="docutils literal notranslate"><span class="pre">search_term</span></code>
 of <code class="docutils literal notranslate"><span class="pre">?q={search_term}</span></code>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ho.base.STATIC_QUERY_KEY">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">STATIC_QUERY_KEY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'x-ho-static-query'</span></span><a class="headerlink" href="#ho.base.STATIC_QUERY_KEY" title="Link to this definition">#</a></dt>
+<dd><p>The operation’s constant query parameters (<code class="docutils literal notranslate"><span class="pre">?lang=en</span></code>), sent on every request.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -523,7 +545,7 @@ Examples:</p></li>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=544df88d"></script>
+      <script src="../_static/documentation_options.js?v=f0357c94"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
