@@ -449,9 +449,7 @@ def route_to_func(
             name, where = locations.get(pyname, (pyname, None))
             if where == "path":
                 if value is None:
-                    raise ValueError(
-                        f"Path parameter {name!r} is required, got None."
-                    )
+                    raise ValueError(f"Path parameter {name!r} is required, got None.")
                 split["path"][name] = value
             elif value is None:  # an omitted optional is not sent at all
                 continue
@@ -490,7 +488,9 @@ def route_to_func(
         formatted_url = full_url
         if path_params:
             for name, value in path_params.items():
-                formatted_url = formatted_url.replace(f"{{{name}}}", quote(str(value), safe=""))
+                formatted_url = formatted_url.replace(
+                    f"{{{name}}}", quote(str(value), safe="")
+                )
 
         # Set up headers
         headers = {"Content-Type": "application/json"}

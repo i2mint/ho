@@ -26,19 +26,33 @@ SPEC = {
     "paths": {
         "/items/{id}": {
             "parameters": [  # shared by every operation of the path item
-                {"name": "id", "in": "path", "required": True, "schema": {"type": "string"}}
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": True,
+                    "schema": {"type": "string"},
+                }
             ],
             "get": {
                 "parameters": [
                     {"name": "active", "in": "query", "schema": {"type": "boolean"}},
                     {"name": "tags", "in": "query", "schema": {"type": "array"}},
-                    {"name": "Content-Type", "in": "header", "schema": {"type": "string"}},
+                    {
+                        "name": "Content-Type",
+                        "in": "header",
+                        "schema": {"type": "string"},
+                    },
                 ],
                 "requestBody": BODY,
             },
             "post": {
                 "parameters": [
-                    {"name": "name", "in": "query", "description": "a filter", "schema": {"type": "string"}},
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "a filter",
+                        "schema": {"type": "string"},
+                    },
                     {"name": "id", "in": "header", "schema": {"type": "integer"}},
                 ],
                 "requestBody": BODY,

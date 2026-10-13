@@ -82,8 +82,16 @@ RENAMING_SPEC = {
                     },
                     {"name": "$first", "in": "query", "schema": {"type": "integer"}},
                     {"name": "pageSize", "in": "query", "schema": {"type": "integer"}},
-                    {"name": "X-MS-API-ROLE", "in": "header", "schema": {"type": "string"}},
-                    {"name": "session-id", "in": "cookie", "schema": {"type": "string"}},
+                    {
+                        "name": "X-MS-API-ROLE",
+                        "in": "header",
+                        "schema": {"type": "string"},
+                    },
+                    {
+                        "name": "session-id",
+                        "in": "cookie",
+                        "schema": {"type": "string"},
+                    },
                 ],
                 "requestBody": {
                     "content": {
@@ -104,7 +112,9 @@ RENAMING_SPEC = {
 
 def _renaming_func():
     session = _FakeSession()
-    (func,) = routes_to_funcs(RENAMING_SPEC, "http://example.com", session=session).values()
+    (func,) = routes_to_funcs(
+        RENAMING_SPEC, "http://example.com", session=session
+    ).values()
     return func, session
 
 
