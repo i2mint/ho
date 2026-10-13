@@ -1,34 +1,34 @@
 {
   "schema_version": 1,
-  "built_at": "2026-10-13T11:37:41Z",
+  "built_at": "2026-10-13T12:38:21Z",
   "package": {
     "name": "ho",
-    "version": "0.0.13",
+    "version": "0.0.14",
     "display_name": "ho",
     "source": "setup.cfg"
   },
   "git": {
     "available": true,
-    "commit": "ed258a9584fc14accdedfc60052830260bfbfb0e",
-    "short_commit": "ed258a9",
+    "commit": "a59937c2a7e82b3f2684794dd608901dd6bbf944",
+    "short_commit": "a59937c",
     "branch": "master",
     "tags": [
-      "0.0.13"
+      "0.0.14"
     ],
     "dirty": false,
     "remote_url": "https://github.com/i2mint/ho",
-    "commit_url": "https://github.com/i2mint/ho/commit/ed258a9584fc14accdedfc60052830260bfbfb0e",
+    "commit_url": "https://github.com/i2mint/ho/commit/a59937c2a7e82b3f2684794dd608901dd6bbf944",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "i2mint/ho",
-    "sha": "8fb71de705a01ca8ec193e25c1357dd9f3bbec10",
+    "sha": "1a706db8253bb8e9906a0516b1f5bba812e69074",
     "sha_in_history": true,
     "ref": "refs/heads/master",
     "ref_name": "master",
-    "run_id": "38391342831",
-    "run_url": "https://github.com/i2mint/ho/actions/runs/38391342831",
+    "run_id": "38398562633",
+    "run_url": "https://github.com/i2mint/ho/actions/runs/38398562633",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -58,18 +58,20 @@
   },
   "site": {
     "modules_documented": 3,
-    "objects_documented": 11
+    "objects_documented": 12
   },
   "pypi": {
     "checked": true,
     "latest": "0.0.13",
-    "relation": "same",
+    "relation": "ahead",
     "error": null
   },
-  "reproduce": "git clone https://github.com/i2mint/ho && cd ho\ngit checkout ed258a9584fc14accdedfc60052830260bfbfb0e\npip install \"epythet==0.2.15\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/i2mint/ho && cd ho\ngit checkout a59937c2a7e82b3f2684794dd608901dd6bbf944\npip install \"epythet==0.2.15\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
-    "aligned": true,
-    "notes": []
+    "aligned": false,
+    "notes": [
+      "The documented version (0.0.14) is ahead of the latest release on PyPI (0.0.13): these docs describe unreleased code."
+    ]
   }
 }

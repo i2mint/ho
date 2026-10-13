@@ -4,6 +4,12 @@ ho.base
 .. automodule:: ho.base
 
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      PYTHON_NAME_KEY
+   
    .. rubric:: Functions
 
    .. autosummary::

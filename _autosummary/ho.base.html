@@ -84,6 +84,7 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#ho.base.PYTHON_NAME_KEY"><code class="docutils literal notranslate"><span class="pre">PYTHON_NAME_KEY</span></code></a></li>
 <li><a class="reference internal" href="#ho.base.default_error_handler"><code class="docutils literal notranslate"><span class="pre">default_error_handler()</span></code></a></li>
 <li><a class="reference internal" href="#ho.base.default_response_processor"><code class="docutils literal notranslate"><span class="pre">default_response_processor()</span></code></a></li>
 <li><a class="reference internal" href="#ho.base.default_route_maker"><code class="docutils literal notranslate"><span class="pre">default_route_maker()</span></code></a></li>
@@ -134,6 +135,16 @@ data-aria-dark="Switch to auto color mode">
           <section id="module-ho.base">
 <span id="ho-base"></span><h1>ho.base<a class="headerlink" href="#module-ho.base" title="Link to this heading">#</a></h1>
 <p>HO base objects</p>
+<p class="rubric">Module Attributes</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ho.base.PYTHON_NAME_KEY" title="ho.base.PYTHON_NAME_KEY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PYTHON_NAME_KEY</span></code></a></p></td>
+<td><p>A parameter schema's <code class="docutils literal notranslate"><span class="pre">x-python-name</span></code> is the name of the Python argument to send under the parameter's own (spec) name, e.g. the placeholder <code class="docutils literal notranslate"><span class="pre">search_term</span></code> of <code class="docutils literal notranslate"><span class="pre">?q={search_term}</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -171,6 +182,14 @@ data-aria-dark="Switch to auto color mode">
 </tbody>
 </table>
 </div>
+<dl class="py data">
+<dt class="sig sig-object py" id="ho.base.PYTHON_NAME_KEY">
+<span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">PYTHON_NAME_KEY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'x-python-name'</span></span><a class="headerlink" href="#ho.base.PYTHON_NAME_KEY" title="Link to this definition">#</a></dt>
+<dd><p>A parameter schema’s <code class="docutils literal notranslate"><span class="pre">x-python-name</span></code> is the name of the Python argument to
+send under the parameter’s own (spec) name, e.g. the placeholder <code class="docutils literal notranslate"><span class="pre">search_term</span></code>
+of <code class="docutils literal notranslate"><span class="pre">?q={search_term}</span></code>.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="ho.base.default_error_handler">
 <span class="sig-prename descclassname"><span class="pre">ho.base.</span></span><span class="sig-name descname"><span class="pre">default_error_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exception</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ho/base.html#default_error_handler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ho.base.default_error_handler" title="Link to this definition">#</a></dt>
@@ -391,6 +410,8 @@ Examples:</p></li>
 </span><span data-line="13"><span class="go">'&lt;html&gt;'</span>
 </span><span data-line="14"><span class="gp">&gt;&gt;&gt; </span><span class="n">sent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"url"</span><span class="p">]</span>
 </span><span data-line="15"><span class="go">'https://www.google.com/search'</span>
+</span><span data-line="16"><span class="gp">&gt;&gt;&gt; </span><span class="n">sent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"params"</span><span class="p">]</span>  <span class="c1"># sent under the template's key, not the argument's name</span>
+</span><span data-line="17"><span class="go">{'q': 'Python'}</span>
 </span></pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example using REST Countries API with path and query parameters</span>
@@ -502,7 +523,7 @@ Examples:</p></li>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=9fc46840"></script>
+      <script src="../_static/documentation_options.js?v=544df88d"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

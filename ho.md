@@ -1,4 +1,4 @@
-> built 2026-10-13 11:37 UTC from ed258a9 (master) · ho 0.0.13. Details: build_info.json
+> built 2026-10-13 12:38 UTC from a59937c (master) · ho 0.0.14. Details: build_info.json
 
 # index.html.md
 
@@ -238,6 +238,11 @@ MIT
 
 HO base objects
 
+### Module Attributes
+
+| [`PYTHON_NAME_KEY`](_autosummary/ho.base.html.md#ho.base.PYTHON_NAME_KEY)   | A parameter schema's `x-python-name` is the name of the Python argument to send under the parameter's own (spec) name, e.g. the placeholder `search_term` of `?q={search_term}`.   |
+|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+
 ### Functions
 
 | [`default_error_handler`](_autosummary/ho.base.html.md#ho.base.default_error_handler)(response[, exception])      | Default error handling: raise for status and return exception info if any              |
@@ -251,6 +256,12 @@ HO base objects
 | [`update_spec`](_autosummary/ho.base.html.md#ho.base.update_spec)(spec, path, method[, ...])            | Update an OpenAPI spec with provided parameters for a specific path and method.        |
 | [`url_template_to_func`](_autosummary/ho.base.html.md#ho.base.url_template_to_func)(url_template, \*[, ...])     | Convert a URL template directly to a Python function.                                  |
 | [`url_template_to_openapi`](_autosummary/ho.base.html.md#ho.base.url_template_to_openapi)(url_template, \*[, ...])  | Convert a URL template with placeholders to an OpenAPI specification.                  |
+
+### ho.base.PYTHON_NAME_KEY *= 'x-python-name'*
+
+A parameter schema’s `x-python-name` is the name of the Python argument to
+send under the parameter’s own (spec) name, e.g. the placeholder `search_term`
+of `?q={search_term}`.
 
 ### ho.base.default_error_handler(response, exception=None)
 
@@ -492,6 +503,8 @@ custom_headers
 '<html>'
 >>> sent[0]["url"]
 'https://www.google.com/search'
+>>> sent[0]["params"]  # sent under the template's key, not the argument's name
+{'q': 'Python'}
 ```
 
 ```pycon
@@ -628,18 +641,20 @@ Extract all placeholders from a URL template, including their inline defaults.
 
 # About this build
 
-This documentation was built on **2026-10-13 11:37 UTC** from commit <a href="https://github.com/i2mint/ho/commit/ed258a9584fc14accdedfc60052830260bfbfb0e"><code>ed258a9</code></a> on branch <code>master</code>, for **ho 0.0.13** (from <code>setup.cfg</code>).
+This documentation was built on **2026-10-13 12:38 UTC** from commit <a href="https://github.com/i2mint/ho/commit/a59937c2a7e82b3f2684794dd608901dd6bbf944"><code>a59937c</code></a> on branch <code>master</code>, for **ho 0.0.14** (from <code>setup.cfg</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.0.14) is ahead of the latest release on PyPI (0.0.13): these docs describe unreleased code.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/ho/commit/ed258a9584fc14accdedfc60052830260bfbfb0e"><code>ed258a9584fc14accdedfc60052830260bfbfb0e</code></a> |
+| Commit              | <a href="https://github.com/i2mint/ho/commit/a59937c2a7e82b3f2684794dd608901dd6bbf944"><code>a59937c2a7e82b3f2684794dd608901dd6bbf944</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
-| Tags at this commit | <code>0.0.13</code>                                                                                                                              |
+| Tags at this commit | <code>0.0.14</code>                                                                                                                              |
 | Working tree        | clean                                                                                                                                            |
 | Remote              | <code>https://github.com/i2mint/ho</code>                                                                                                        |
 
@@ -648,9 +663,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/ho</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/ho/actions/runs/38391342831">38391342831</a>            |
+| Run          | <a href="https://github.com/i2mint/ho/actions/runs/38398562633">38398562633</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>8fb71de705a01ca8ec193e25c1357dd9f3bbec10</code> (in the history of the built commit) |
+| Event commit | <code>1a706db8253bb8e9906a0516b1f5bba812e69074</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -675,13 +690,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ho/0.0.13/">0.0.13</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/ho/0.0.13/">0.0.13</a>, older than the documented version (0.0.14).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/ho && cd ho
-git checkout ed258a9584fc14accdedfc60052830260bfbfb0e
+git checkout a59937c2a7e82b3f2684794dd608901dd6bbf944
 pip install "epythet==0.2.15"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

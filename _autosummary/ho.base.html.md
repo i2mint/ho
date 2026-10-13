@@ -2,6 +2,11 @@
 
 HO base objects
 
+### Module Attributes
+
+| [`PYTHON_NAME_KEY`](#ho.base.PYTHON_NAME_KEY)   | A parameter schema's `x-python-name` is the name of the Python argument to send under the parameter's own (spec) name, e.g. the placeholder `search_term` of `?q={search_term}`.   |
+|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+
 ### Functions
 
 | [`default_error_handler`](#ho.base.default_error_handler)(response[, exception])      | Default error handling: raise for status and return exception info if any              |
@@ -15,6 +20,12 @@ HO base objects
 | [`update_spec`](#ho.base.update_spec)(spec, path, method[, ...])            | Update an OpenAPI spec with provided parameters for a specific path and method.        |
 | [`url_template_to_func`](#ho.base.url_template_to_func)(url_template, \*[, ...])     | Convert a URL template directly to a Python function.                                  |
 | [`url_template_to_openapi`](#ho.base.url_template_to_openapi)(url_template, \*[, ...])  | Convert a URL template with placeholders to an OpenAPI specification.                  |
+
+### ho.base.PYTHON_NAME_KEY *= 'x-python-name'*
+
+A parameter schema’s `x-python-name` is the name of the Python argument to
+send under the parameter’s own (spec) name, e.g. the placeholder `search_term`
+of `?q={search_term}`.
 
 ### ho.base.default_error_handler(response, exception=None)
 
@@ -256,6 +267,8 @@ custom_headers
 '<html>'
 >>> sent[0]["url"]
 'https://www.google.com/search'
+>>> sent[0]["params"]  # sent under the template's key, not the argument's name
+{'q': 'Python'}
 ```
 
 ```pycon
