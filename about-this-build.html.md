@@ -2,18 +2,16 @@
 
 # About this build
 
-This documentation was built on **2026-10-13 16:29 UTC** from commit <a href="https://github.com/i2mint/ho/commit/867d65da8d10cbd549c3c685ce5416a4131f7074"><code>867d65d</code></a> on branch <code>master</code>, for **ho 0.0.15** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-13 17:20 UTC** from commit <a href="https://github.com/i2mint/ho/commit/85abbaefb3309e2cc8e89548a750310004dde1da"><code>85abbae</code></a> on branch <code>master</code>, for **ho 0.0.16** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.15) is behind the latest release on PyPI (0.0.16): `pip install ho` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/ho/commit/867d65da8d10cbd549c3c685ce5416a4131f7074"><code>867d65da8d10cbd549c3c685ce5416a4131f7074</code></a> |
+| Commit              | <a href="https://github.com/i2mint/ho/commit/85abbaefb3309e2cc8e89548a750310004dde1da"><code>85abbaefb3309e2cc8e89548a750310004dde1da</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
 | Tags at this commit | none                                                                                                                                             |
 | Working tree        | clean                                                                                                                                            |
@@ -24,9 +22,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/ho</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/ho/actions/runs/38430735543">38430735543</a>            |
+| Run          | <a href="https://github.com/i2mint/ho/actions/runs/38437742873">38437742873</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>867d65da8d10cbd549c3c685ce5416a4131f7074</code> (in the history of the built commit) |
+| Event commit | <code>85abbaefb3309e2cc8e89548a750310004dde1da</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -51,13 +49,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ho/0.0.16/">0.0.16</a>, newer than the documented version (0.0.15).
+Latest release: <a href="https://pypi.org/project/ho/0.0.16/">0.0.16</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/ho && cd ho
-git checkout 867d65da8d10cbd549c3c685ce5416a4131f7074
+git checkout 85abbaefb3309e2cc8e89548a750310004dde1da
 pip install "epythet==0.2.17"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
