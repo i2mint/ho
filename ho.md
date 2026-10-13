@@ -1,4 +1,4 @@
-> built 2026-10-13 11:34 UTC from 11a0a65 (master) · ho 0.0.12. Details: build_info.json
+> built 2026-10-13 11:37 UTC from ed258a9 (master) · ho 0.0.13. Details: build_info.json
 
 # index.html.md
 
@@ -477,12 +477,21 @@ custom_headers
 
 ---
 ```pycon
+>>> from types import SimpleNamespace
+>>> sent = []
+>>> def fake_get(**kwargs):  # stands in for a real session, so no network
+...     sent.append(kwargs)
+...     return SimpleNamespace(text="<html>", raise_for_status=lambda: None)
 >>> search_google = url_template_to_func(
 ...     "https://www.google.com/search?q={search_term}",
 ...     description="Search Google",
-...     egress=lambda response: response.text
+...     egress=lambda response: response.text,
+...     session=SimpleNamespace(get=fake_get),
 ... )
->>> results = search_google(search_term="Python")
+>>> search_google(search_term="Python")
+'<html>'
+>>> sent[0]["url"]
+'https://www.google.com/search'
 ```
 
 ```pycon
@@ -619,20 +628,18 @@ Extract all placeholders from a URL template, including their inline defaults.
 
 # About this build
 
-This documentation was built on **2026-10-13 11:34 UTC** from commit <a href="https://github.com/i2mint/ho/commit/11a0a6512939dddff2ccab687a7818fc7f1b1a9e"><code>11a0a65</code></a> on branch <code>master</code>, for **ho 0.0.12** (from <code>setup.cfg</code>).
+This documentation was built on **2026-10-13 11:37 UTC** from commit <a href="https://github.com/i2mint/ho/commit/ed258a9584fc14accdedfc60052830260bfbfb0e"><code>ed258a9</code></a> on branch <code>master</code>, for **ho 0.0.13** (from <code>setup.cfg</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.12) is ahead of the latest release on PyPI (0.0.11): these docs describe unreleased code.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/ho/commit/11a0a6512939dddff2ccab687a7818fc7f1b1a9e"><code>11a0a6512939dddff2ccab687a7818fc7f1b1a9e</code></a> |
+| Commit              | <a href="https://github.com/i2mint/ho/commit/ed258a9584fc14accdedfc60052830260bfbfb0e"><code>ed258a9584fc14accdedfc60052830260bfbfb0e</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
-| Tags at this commit | <code>0.0.12</code>                                                                                                                              |
+| Tags at this commit | <code>0.0.13</code>                                                                                                                              |
 | Working tree        | clean                                                                                                                                            |
 | Remote              | <code>https://github.com/i2mint/ho</code>                                                                                                        |
 
@@ -641,9 +648,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/ho</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/ho/actions/runs/38390994787">38390994787</a>            |
+| Run          | <a href="https://github.com/i2mint/ho/actions/runs/38391342831">38391342831</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>fa726e885201abfa92c315cf1e1036da5b5d088a</code> (in the history of the built commit) |
+| Event commit | <code>8fb71de705a01ca8ec193e25c1357dd9f3bbec10</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -668,13 +675,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ho/0.0.11/">0.0.11</a>, older than the documented version (0.0.12).
+Latest release: <a href="https://pypi.org/project/ho/0.0.13/">0.0.13</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/ho && cd ho
-git checkout 11a0a6512939dddff2ccab687a7818fc7f1b1a9e
+git checkout ed258a9584fc14accdedfc60052830260bfbfb0e
 pip install "epythet==0.2.15"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

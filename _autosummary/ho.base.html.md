@@ -241,12 +241,21 @@ custom_headers
 
 ---
 ```pycon
+>>> from types import SimpleNamespace
+>>> sent = []
+>>> def fake_get(**kwargs):  # stands in for a real session, so no network
+...     sent.append(kwargs)
+...     return SimpleNamespace(text="<html>", raise_for_status=lambda: None)
 >>> search_google = url_template_to_func(
 ...     "https://www.google.com/search?q={search_term}",
 ...     description="Search Google",
-...     egress=lambda response: response.text
+...     egress=lambda response: response.text,
+...     session=SimpleNamespace(get=fake_get),
 ... )
->>> results = search_google(search_term="Python")
+>>> search_google(search_term="Python")
+'<html>'
+>>> sent[0]["url"]
+'https://www.google.com/search'
 ```
 
 ```pycon

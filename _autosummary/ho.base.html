@@ -376,12 +376,21 @@ Examples:</p></li>
 <p class="rubric">Returns</p>
 <p class="rubric">Example</p>
 <hr class="docutils" />
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">search_google</span> <span class="o">=</span> <span class="n">url_template_to_func</span><span class="p">(</span>
-</span><span data-line="2"><span class="gp">... </span>    <span class="s2">"https://www.google.com/search?q=</span><span class="si">{search_term}</span><span class="s2">"</span><span class="p">,</span>
-</span><span data-line="3"><span class="gp">... </span>    <span class="n">description</span><span class="o">=</span><span class="s2">"Search Google"</span><span class="p">,</span>
-</span><span data-line="4"><span class="gp">... </span>    <span class="n">egress</span><span class="o">=</span><span class="k">lambda</span> <span class="n">response</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
-</span><span data-line="5"><span class="gp">... </span><span class="p">)</span>
-</span><span data-line="6"><span class="gp">&gt;&gt;&gt; </span><span class="n">results</span> <span class="o">=</span> <span class="n">search_google</span><span class="p">(</span><span class="n">search_term</span><span class="o">=</span><span class="s2">"Python"</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleNamespace</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="n">sent</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">fake_get</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># stands in for a real session, so no network</span>
+</span><span data-line="4"><span class="gp">... </span>    <span class="n">sent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span data-line="5"><span class="gp">... </span>    <span class="k">return</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"&lt;html&gt;"</span><span class="p">,</span> <span class="n">raise_for_status</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+</span><span data-line="6"><span class="gp">&gt;&gt;&gt; </span><span class="n">search_google</span> <span class="o">=</span> <span class="n">url_template_to_func</span><span class="p">(</span>
+</span><span data-line="7"><span class="gp">... </span>    <span class="s2">"https://www.google.com/search?q=</span><span class="si">{search_term}</span><span class="s2">"</span><span class="p">,</span>
+</span><span data-line="8"><span class="gp">... </span>    <span class="n">description</span><span class="o">=</span><span class="s2">"Search Google"</span><span class="p">,</span>
+</span><span data-line="9"><span class="gp">... </span>    <span class="n">egress</span><span class="o">=</span><span class="k">lambda</span> <span class="n">response</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+</span><span data-line="10"><span class="gp">... </span>    <span class="n">session</span><span class="o">=</span><span class="n">SimpleNamespace</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="n">fake_get</span><span class="p">),</span>
+</span><span data-line="11"><span class="gp">... </span><span class="p">)</span>
+</span><span data-line="12"><span class="gp">&gt;&gt;&gt; </span><span class="n">search_google</span><span class="p">(</span><span class="n">search_term</span><span class="o">=</span><span class="s2">"Python"</span><span class="p">)</span>
+</span><span data-line="13"><span class="go">'&lt;html&gt;'</span>
+</span><span data-line="14"><span class="gp">&gt;&gt;&gt; </span><span class="n">sent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"url"</span><span class="p">]</span>
+</span><span data-line="15"><span class="go">'https://www.google.com/search'</span>
 </span></pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example using REST Countries API with path and query parameters</span>
@@ -493,7 +502,7 @@ Examples:</p></li>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=3bbcec59"></script>
+      <script src="../_static/documentation_options.js?v=9fc46840"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
