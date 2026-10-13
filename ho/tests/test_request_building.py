@@ -156,14 +156,33 @@ _FORMS_SPEC = {
         "/form/{flag}": {
             "post": {
                 "parameters": [
-                    {"name": "flag", "in": "path", "required": True, "schema": {"type": "boolean"}},
-                    {"name": "Accept", "in": "header", "required": True, "schema": {"type": "string"}},
-                    {"name": "Authorization", "in": "header", "schema": {"type": "string"}},
+                    {
+                        "name": "flag",
+                        "in": "path",
+                        "required": True,
+                        "schema": {"type": "boolean"},
+                    },
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "required": True,
+                        "schema": {"type": "string"},
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "schema": {"type": "string"},
+                    },
                 ],
                 "requestBody": {
                     "content": {
                         "application/x-www-form-urlencoded": {
-                            "schema": {"properties": {"on": {"type": "boolean"}, "tags": {"type": "array"}}}
+                            "schema": {
+                                "properties": {
+                                    "on": {"type": "boolean"},
+                                    "tags": {"type": "array"},
+                                }
+                            }
                         }
                     }
                 },
@@ -174,7 +193,12 @@ _FORMS_SPEC = {
                 "requestBody": {
                     "content": {
                         "multipart/form-data": {
-                            "schema": {"properties": {"file": {"type": "string"}, "n": {"type": "integer"}}}
+                            "schema": {
+                                "properties": {
+                                    "file": {"type": "string"},
+                                    "n": {"type": "integer"},
+                                }
+                            }
                         }
                     }
                 }
@@ -223,7 +247,11 @@ def test_a_multipart_body_is_sent_as_files(forms):
 def test_a_path_parameter_that_does_not_say_where_is_found_in_the_url():
     spec = {
         "openapi": "3.0.0",
-        "paths": {"/i/{id}": {"get": {"parameters": [{"name": "id", "schema": {"type": "string"}}]}}},
+        "paths": {
+            "/i/{id}": {
+                "get": {"parameters": [{"name": "id", "schema": {"type": "string"}}]}
+            }
+        },
     }
     session = _FakeSession()
     routes_to_funcs(spec, "http://e.com", session=session)["get", "/i/{id}"]("7")
@@ -258,7 +286,11 @@ def test_a_path_parameter_without_in_is_found_even_when_its_name_clashes():
             "/u/{id}": {
                 "post": {
                     "parameters": [
-                        {"name": "id", "description": "THE ID", "schema": {"type": "string"}}
+                        {
+                            "name": "id",
+                            "description": "THE ID",
+                            "schema": {"type": "string"},
+                        }
                     ],
                     "requestBody": {
                         "content": {
@@ -287,8 +319,11 @@ def test_a_route_like_without_body_content_type_still_works():
     class RouteLike:
         def __init__(self, route):
             self.__dict__.update(
-                method=route.method, endpoint=route.endpoint, params=route.params,
-                input_specs=route.input_specs, method_data=route.method_data,
+                method=route.method,
+                endpoint=route.endpoint,
+                params=route.params,
+                input_specs=route.input_specs,
+                method_data=route.method_data,
             )
 
     session = _FakeSession()

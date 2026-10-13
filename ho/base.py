@@ -623,9 +623,7 @@ def route_to_func(
         formatted_url = full_url
         if path_params:
             for name, value in path_params.items():
-                formatted_url = formatted_url.replace(
-                    f"{{{name}}}", _path_value(value)
-                )
+                formatted_url = formatted_url.replace(f"{{{name}}}", _path_value(value))
 
         # Set up headers
         sent_as_form = body_type in (_FORM_MEDIA_TYPE, _MULTIPART_MEDIA_TYPE)
