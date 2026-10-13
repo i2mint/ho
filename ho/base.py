@@ -261,6 +261,21 @@ def default_route_maker(
         )
 
 
+def _simple_style(value) -> str:
+    """A header or cookie value serialised the way OpenAPI's ``simple`` style does.
+
+    >>> _simple_style(True), _simple_style(3), _simple_style(['a', 'b'])
+    ('true', '3', 'a,b')
+    """
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (list, tuple)):
+        return ",".join(_simple_style(v) for v in value)
+    if isinstance(value, bytes):
+        return value.decode()
+    return str(value)
+
+
 def route_to_func(
     route,
     base_url: str | None = None,
@@ -409,7 +424,9 @@ def route_to_func(
             elif value is None:  # an omitted optional is not sent at all
                 continue
             elif where in ("query", "header", "cookie"):
-                split[where][name] = value if where == "query" else str(value)
+                split[where][name] = (
+                    value if where == "query" else _simple_style(value)
+                )
             elif route.input_specs.get("requestBody"):
                 split["body"][name] = value
         return split

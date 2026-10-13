@@ -147,3 +147,11 @@ def test_the_mapping_is_exposed_and_documented():
     assert all(name.isidentifier() for name in names)
     py_first = next(n for n, spec in names.items() if spec == "$first")
     assert f"{py_first} (sent as '$first')" in func.__doc__
+
+
+def test_header_values_use_openapi_simple_style():
+    func, session = _renaming_func()
+    py = {spec: name for name, spec in func.openapi_param_names.items()}
+    func(**{py["thingId"]: "x", py["X-MS-API-ROLE"]: ["a", True]})
+    (call,) = session.calls
+    assert call["headers"]["X-MS-API-ROLE"] == "a,true"
