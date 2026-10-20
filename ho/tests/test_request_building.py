@@ -337,3 +337,20 @@ def test_a_route_like_without_body_content_type_still_works():
     )
     f("x", name="n")
     assert session.calls[0]["url"] == "http://e.com/items/x"
+
+
+def test_composed_parts_are_not_listed_as_sent_names():
+    from ho import route_to_func
+
+    f = route_to_func("http://x.com/a?r={lo}-{hi}&q={z}")
+    assert f.openapi_param_names == {"z": "q"}
+    assert f.openapi_composed_params == {"lo": "r", "hi": "r"}
+
+
+def test_percent_encoded_braces_are_literal_not_placeholders():
+    from ho import route_to_func
+
+    f = route_to_func("http://x.com/a?s=%7Blit%7D&q={z}")
+    assert list(f.openapi_param_names) == ["z"]
+    with pytest.raises(ValueError, match="literal brace"):
+        route_to_func("http://x.com/a?t=%7Bx%7D-{y}")

@@ -5,7 +5,7 @@ import os
 import re
 from typing import Optional
 from collections.abc import Callable
-from urllib.parse import urlparse, parse_qs, quote
+from urllib.parse import urlparse, parse_qs, quote, unquote_plus
 
 import requests
 
@@ -777,7 +777,19 @@ def route_to_func(
     """
     # Python name -> the name the spec uses, for callers that must translate
     # back (a pagination cursor named ``$after``, say). i2mint/ho#1, #2.
-    func.openapi_param_names = dict(original_names)
+    # (the parts of a composed query value, ``?r={lo}-{hi}``, are not sent by
+    # themselves: they are in ``openapi_composed_params``, by the key they go into)
+    composed = {
+        pyname: prop[COMPOSED_INTO_KEY]
+        for pyname, prop in zip(original_names, params_schema["properties"].values())
+        if COMPOSED_INTO_KEY in prop
+    }
+    func.openapi_param_names = {
+        pyname: spec_name
+        for pyname, spec_name in original_names.items()
+        if pyname not in composed
+    }
+    func.openapi_composed_params = composed
 
     return func
 
@@ -969,7 +981,14 @@ def url_template_to_openapi(
             param_defaults[name] = default_value
         return name
 
-    for key, values in parse_qs(parsed_url.query, keep_blank_values=True).items():
+    # (The raw query is split, and decoded only after the placeholders are found:
+    # ``%7Blit%7D`` is the literal text ``{lit}``, not a placeholder.)
+    raw_query = {}  # key -> list of raw values
+    for part in filter(None, parsed_url.query.split("&")):
+        raw_key, _, raw_value = part.partition("=")
+        raw_query.setdefault(unquote_plus(raw_key), []).append(raw_value)
+
+    for key, values in raw_query.items():
         if _PLACEHOLDER.search(key) or "{" in key or "}" in key:
             raise ValueError(
                 f"A placeholder in the query key {key!r} is not supported: the key "
@@ -985,7 +1004,7 @@ def url_template_to_openapi(
         if "{" in _PLACEHOLDER.sub("", value) or "}" in _PLACEHOLDER.sub("", value):
             raise ValueError(f"Malformed placeholder in the query: {key}={value}")
         if not contents:
-            static_query[key] = value
+            static_query[key] = unquote_plus(value)
         elif _PLACEHOLDER.fullmatch(value):
             query_params.append((_split_placeholder(contents[0]), key, None))
         else:  # literal text around the placeholder(s)
@@ -993,8 +1012,16 @@ def url_template_to_openapi(
                 if (name, key) not in composed_seen:  # (one parameter per part)
                     composed_seen.add((name, key))
                     query_params.append((name, f"{key}[{name}]", key))
-            query_templates[key] = _PLACEHOLDER.sub(
-                lambda m: "{%s}" % m.group(1).partition(":")[0], value
+            # (the text around the placeholders is decoded)
+            texts = [unquote_plus(t) for t in _PLACEHOLDER.split(value)[::2]]
+            if any("{" in t or "}" in t for t in texts):
+                raise ValueError(
+                    f"A literal brace in the composed query value {key}={value} is "
+                    "not supported."
+                )
+            query_templates[key] = "".join(
+                "{%s}" % piece.partition(":")[0] if i % 2 else unquote_plus(piece)
+                for i, piece in enumerate(_PLACEHOLDER.split(value))
             )
 
     # Create OpenAPI spec from template or default
