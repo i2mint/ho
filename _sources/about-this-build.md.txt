@@ -5,7 +5,7 @@ orphan: true
 
 # About this build
 
-This documentation was built on **2026-10-20 09:57 UTC** from commit <a href="https://github.com/i2mint/ho/commit/7c231b5b391178c0ebcc5099bf1ae5a0a5a7a16c"><code>7c231b5</code></a> on branch <code>master</code>, for **ho 0.0.17** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-22 19:19 UTC** from commit <a href="https://github.com/i2mint/ho/commit/dc68dca5f055e3a0d5151dd4ca68ca670b63c5c5"><code>dc68dca</code></a> on branch <code>master</code>, for **ho 0.0.18** (from <code>pyproject.toml</code>).
 
 :::{note}
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -15,7 +15,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 | | |
 |---|---|
-| Commit | <a href="https://github.com/i2mint/ho/commit/7c231b5b391178c0ebcc5099bf1ae5a0a5a7a16c"><code>7c231b5b391178c0ebcc5099bf1ae5a0a5a7a16c</code></a> |
+| Commit | <a href="https://github.com/i2mint/ho/commit/dc68dca5f055e3a0d5151dd4ca68ca670b63c5c5"><code>dc68dca5f055e3a0d5151dd4ca68ca670b63c5c5</code></a> |
 | Branch | <code>master</code> |
 | Tags at this commit | none |
 | Working tree | clean |
@@ -26,18 +26,18 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 | | |
 |---|---|
 | Repository | <code>i2mint/ho</code> |
-| Run | <a href="https://github.com/i2mint/ho/actions/runs/39404292622">39404292622</a> |
+| Run | <a href="https://github.com/i2mint/ho/actions/runs/45059961593">45059961593</a> |
 | Ref | <code>refs/heads/master</code> |
-| Event commit | <code>7c231b5b391178c0ebcc5099bf1ae5a0a5a7a16c</code> (in the history of the built commit) |
+| Event commit | <code>dc68dca5f055e3a0d5151dd4ca68ca670b63c5c5</code> (in the history of the built commit) |
 
 ## Tools
 
 | | |
 |---|---|
-| epythet | 0.2.18 |
+| epythet | 0.2.23 |
 | Sphinx | 9.1.1 |
 | docutils | 0.22.4 |
-| Python | 3.12.15 |
+| Python | 3.12.16 |
 
 ## Configuration as resolved
 
@@ -53,14 +53,14 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/ho/0.0.17/">0.0.17</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/ho/0.0.18/">0.0.18</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/ho && cd ho
-git checkout 7c231b5b391178c0ebcc5099bf1ae5a0a5a7a16c
-pip install "epythet==0.2.18"
+git checkout dc68dca5f055e3a0d5151dd4ca68ca670b63c5c5
+pip install "epythet==0.2.23"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 
